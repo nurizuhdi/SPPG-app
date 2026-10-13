@@ -1,0 +1,48 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f172a"><title>Kebijakan Refund — SPPG</title>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--tx:#1e293b;--mut:#64748b;--ln:#e2e8f0;--ac:#16a34a}
+@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#1e293b;--tx:#e2e8f0;--mut:#94a3b8;--ln:#334155;--ac:#4ade80}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.7 system-ui,Arial,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{background:#0f172a;color:#fff;padding:18px 20px}header a{color:#86efac;text-decoration:none;font-size:14px}
+main{max-width:760px;margin:0 auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:22px;margin-bottom:16px}
+h1{font-size:24px;margin:.2em 0}h2{font-size:18px;margin:1.4em 0 .3em}p,li{color:var(--tx)}small,.mut{color:var(--mut)}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}nav a{padding:7px 12px;border:1px solid var(--ln);border-radius:999px;color:var(--tx);text-decoration:none;font-size:14px;background:var(--card)}
+nav a.on{background:var(--ac);color:#052e16;border-color:var(--ac);font-weight:600}
+details{border-bottom:1px solid var(--ln);padding:12px 0}summary{cursor:pointer;font-weight:600}details p{margin:.6em 0 0}
+.note{background:#fef3c7;color:#78350f;border-radius:10px;padding:10px 14px;font-size:14px}
+</style></head><body>
+<header><a href="./">&larr; Kembali ke aplikasi SPPG</a></header>
+<main>
+<nav><a href="privasi.html">Kebijakan Privasi</a><a href="syarat.html">Syarat &amp; Ketentuan</a><a href="refund.html" class="on">Kebijakan Refund</a><a href="faq.html">FAQ</a></nav>
+<div class="card">
+<h1>Kebijakan Refund</h1><p class="mut"><small>Terakhir diperbarui: <span data-f="date"></span> &middot; Penyedia layanan: <b data-f="name"></b></small></p>
+<p>Kebijakan ini berlaku untuk pembayaran langganan SPPG (<b data-f="price"></b> per 30 hari) yang dibayar lewat Midtrans.</p>
+<div class="note">Trial 30 hari gratis disediakan agar Anda bisa mencoba sebelum membayar. Karena itu, pembayaran yang sudah berhasil dan layanan yang sudah aktif pada dasarnya <b>tidak dapat di-refund</b>, kecuali pada kondisi di bawah.</div>
+<h2>Refund dapat diberikan jika</h2>
+<ul><li>Terjadi <b>pembayaran ganda</b> untuk periode yang sama.</li>
+<li>Pembayaran berhasil tetapi <b>langganan tidak aktif</b> dan kami tidak dapat memperbaikinya.</li>
+<li>Layanan <b>tidak dapat dipakai sama sekali</b> karena gangguan dari sisi kami, dan diajukan dalam <b><span data-f="days"></span> hari</b> sejak pembayaran.</li></ul>
+<h2>Refund tidak diberikan jika</h2>
+<ul><li>Anda berubah pikiran atau tidak lagi membutuhkan layanan setelah langganan aktif.</li>
+<li>Akun ditangguhkan karena pelanggaran Syarat &amp; Ketentuan.</li>
+<li>Kendala berasal dari perangkat, jaringan internet, atau kesalahan input data pengguna.</li></ul>
+<h2>Cara mengajukan</h2>
+<ol><li>Hubungi kami lewat email atau WhatsApp di bawah.</li><li>Sertakan nama, email Admin, nomor pesanan, waktu pembayaran, dan bukti pembayaran.</li><li>Kami memeriksa pengajuan dan memberi jawaban dalam beberapa hari kerja.</li></ol>
+<p>Refund yang disetujui dikembalikan lewat metode pembayaran asal atau cara lain yang disepakati; lama proses mengikuti penyedia pembayaran. Lihat juga <a href="syarat.html">Syarat &amp; Ketentuan</a>.</p>
+</div>
+<p class="mut" style="text-align:center"><small>&copy; <span data-f="year"></span> <span data-f="name"></span>. Kontak: <a href="#" data-f="mail"></a> &middot; <a href="#" data-f="wa">WhatsApp</a></small></p>
+</main>
+<script src="config.js"></script>
+<script>
+(function(){
+ var g=function(n,d){try{return eval(n)}catch(e){return d}};
+ var v={name:g('BUSINESS_NAME','[Nama Usaha]'),email:g('CONTACT_EMAIL','[email]'),wa:g('CONTACT_WA',''),price:g('SUBSCRIPTION_PRICE_TEXT','Rp150.000'),days:g('REFUND_DAYS',7)};
+ var now=new Date();v.date=now.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});v.year=now.getFullYear();
+ document.querySelectorAll('[data-f]').forEach(function(e){var k=e.getAttribute('data-f');
+  if(k==='mail'){e.textContent=v.email;e.href='mailto:'+v.email}
+  else if(k==='wa'){e.href=v.wa?'https://wa.me/'+v.wa:'#'}
+  else if(v[k]!==undefined)e.textContent=v[k]});
+})();
+</script></body></html>

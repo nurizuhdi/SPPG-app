@@ -1,0 +1,57 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f172a"><title>Kebijakan Privasi — SPPG</title>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--tx:#1e293b;--mut:#64748b;--ln:#e2e8f0;--ac:#16a34a}
+@media(prefers-color-scheme:dark){:root{--bg:#0f172a;--card:#1e293b;--tx:#e2e8f0;--mut:#94a3b8;--ln:#334155;--ac:#4ade80}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.7 system-ui,Arial,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+header{background:#0f172a;color:#fff;padding:18px 20px}header a{color:#86efac;text-decoration:none;font-size:14px}
+main{max-width:760px;margin:0 auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--ln);border-radius:14px;padding:22px;margin-bottom:16px}
+h1{font-size:24px;margin:.2em 0}h2{font-size:18px;margin:1.4em 0 .3em}p,li{color:var(--tx)}small,.mut{color:var(--mut)}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px}nav a{padding:7px 12px;border:1px solid var(--ln);border-radius:999px;color:var(--tx);text-decoration:none;font-size:14px;background:var(--card)}
+nav a.on{background:var(--ac);color:#052e16;border-color:var(--ac);font-weight:600}
+details{border-bottom:1px solid var(--ln);padding:12px 0}summary{cursor:pointer;font-weight:600}details p{margin:.6em 0 0}
+.note{background:#fef3c7;color:#78350f;border-radius:10px;padding:10px 14px;font-size:14px}
+</style></head><body>
+<header><a href="./">&larr; Kembali ke aplikasi SPPG</a></header>
+<main>
+<nav><a href="privasi.html" class="on">Kebijakan Privasi</a><a href="syarat.html">Syarat &amp; Ketentuan</a><a href="refund.html">Kebijakan Refund</a><a href="faq.html">FAQ</a></nav>
+<div class="card">
+<h1>Kebijakan Privasi</h1><p class="mut"><small>Terakhir diperbarui: <span data-f="date"></span> &middot; Penyedia layanan: <b data-f="name"></b></small></p>
+<p>Kebijakan ini menjelaskan data apa yang dikumpulkan aplikasi SPPG, untuk apa dipakai, dan bagaimana data Anda dilindungi.</p>
+<h2>1. Data yang kami kumpulkan</h2>
+<ul><li><b>Data akun:</b> nama dan alamat email Admin; nama Operator. Password disimpan oleh sistem login (Supabase Auth) dalam bentuk terenkripsi dan tidak bisa kami baca.</li>
+<li><b>Data operasional:</b> master barang, transaksi (masuk, keluar, sampah, koreksi), supplier, ompreng, dan pengaturan yang Anda isi sendiri.</li>
+<li><b>Data pembayaran:</b> nomor pesanan, jumlah, dan status pembayaran. Data kartu atau rekening diproses langsung oleh Midtrans dan <b>tidak</b> kami simpan.</li>
+<li><b>Foto bukti barang masuk:</b> hanya ditawarkan tersimpan ke galeri perangkat Anda. Foto tidak diunggah ke server kami.</li>
+<li><b>Penyimpanan di perangkat:</b> aplikasi menyimpan dua penanda kecil di browser Anda (status aktivasi lisensi dan Kode Workspace terakhir) agar tidak perlu mengisi ulang.</li></ul>
+<h2>2. Untuk apa data dipakai</h2>
+<p>Untuk menjalankan aplikasi (login, mencatat stok, laporan, invoice), mengirim kode OTP verifikasi email, memproses langganan, dan memberi bantuan saat Anda menghubungi kami. Kami tidak menjual data Anda dan tidak memakainya untuk iklan.</p>
+<h2>3. Pemisahan data antar pengguna</h2>
+<p>Setiap Admin memiliki ruang data (workspace) sendiri. Data satu workspace tidak dapat dilihat oleh workspace lain; pemisahan ini ditegakkan di tingkat database. Operator hanya dapat mengakses workspace Admin yang menambahkannya.</p>
+<h2>4. Pihak ketiga yang membantu layanan</h2>
+<ul><li><b>Supabase</b> &mdash; database, login, dan fungsi server.</li><li><b>Cloudflare</b> &mdash; hosting halaman aplikasi.</li><li><b>Midtrans</b> &mdash; pembayaran langganan.</li><li><b>Penyedia email (SMTP)</b> &mdash; pengiriman kode OTP.</li></ul>
+<p>Pihak-pihak ini memproses data sesuai kebijakan mereka masing-masing.</p>
+<h2>5. Penyimpanan dan penghapusan</h2>
+<p>Data disimpan selama akun Anda aktif. Anda dapat meminta akses, perbaikan, atau penghapusan data akun dan workspace kapan saja lewat kontak di bawah. Sebelum itu, kami sarankan Anda mengekspor laporan Excel sebagai arsip.</p>
+<h2>6. Keamanan</h2>
+<p>Kami memakai koneksi terenkripsi (HTTPS), pembatasan akses per workspace, dan penyimpanan password terenkripsi. Tidak ada sistem yang 100% aman; jaga kerahasiaan password dan jangan membagikannya.</p>
+<h2>7. Hak Anda</h2>
+<p>Sesuai peraturan pelindungan data pribadi yang berlaku di Indonesia, Anda berhak mengakses, memperbaiki, dan meminta penghapusan data pribadi Anda.</p>
+<h2>8. Perubahan kebijakan &amp; kontak</h2>
+<p>Perubahan akan ditampilkan di halaman ini beserta tanggal pembaruan. Pertanyaan? Hubungi <b data-f="name"></b> lewat email atau WhatsApp di bagian bawah halaman.</p>
+</div>
+<p class="mut" style="text-align:center"><small>&copy; <span data-f="year"></span> <span data-f="name"></span>. Kontak: <a href="#" data-f="mail"></a> &middot; <a href="#" data-f="wa">WhatsApp</a></small></p>
+</main>
+<script src="config.js"></script>
+<script>
+(function(){
+ var g=function(n,d){try{return eval(n)}catch(e){return d}};
+ var v={name:g('BUSINESS_NAME','[Nama Usaha]'),email:g('CONTACT_EMAIL','[email]'),wa:g('CONTACT_WA',''),price:g('SUBSCRIPTION_PRICE_TEXT','Rp150.000'),days:g('REFUND_DAYS',7)};
+ var now=new Date();v.date=now.toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'});v.year=now.getFullYear();
+ document.querySelectorAll('[data-f]').forEach(function(e){var k=e.getAttribute('data-f');
+  if(k==='mail'){e.textContent=v.email;e.href='mailto:'+v.email}
+  else if(k==='wa'){e.href=v.wa?'https://wa.me/'+v.wa:'#'}
+  else if(v[k]!==undefined)e.textContent=v[k]});
+})();
+</script></body></html>
