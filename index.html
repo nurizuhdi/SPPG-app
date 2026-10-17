@@ -25,6 +25,8 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Pustaka animasi "motion" (versi dipin). Bila gagal dimuat, aplikasi tetap jalan normal tanpa animasi. -->
+    <script src="https://cdn.jsdelivr.net/npm/motion@13.4.6/dist/motion.js" defer></script>
 
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -84,6 +86,15 @@
 
         .toast-enter { transform: translateX(100%); opacity: 0; }
         .toast-enter-active { transform: translateX(0); opacity: 1; transition: all 0.3s ease; }
+
+        /* Umpan balik tekan tombol: halus, dan mati otomatis bila perangkat meminta gerakan dikurangi */
+        @media (prefers-reduced-motion: no-preference) {
+            button { transition: transform 0.12s ease, background-color 0.15s ease, opacity 0.15s ease; }
+            button:not([disabled]):active, .nav-btn:active { transform: scale(0.97); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .view-section.active, .animate-fade-in, .animate-slide-up { animation: none; }
+        }
 
         /* Layout Transitions */
         .view-section { display: none; }
@@ -659,8 +670,8 @@
                                     <p class="text-[11px] text-slate-400 mt-1">Dipakai untuk mencocokkan Invoice tagihan supplier di Riwayat Transaksi (metode FIFO).</p>
                                 </div>
                                 <div>
-                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan (opsional)</label>
-                                    <input type="text" id="inNote" placeholder="Catatan tambahan..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan (wajib)</label>
+                                    <input type="text" id="inNote" required placeholder="Catatan (wajib diisi)..." class="w-full border border-slate-300 rounded-lg p-2.5 text-sm">
                                 </div>
                             </div>
 
@@ -672,6 +683,9 @@
                                     </button>
                                     <button type="button" onclick="resetInPhoto()" id="inPhotoClearBtn" class="hidden px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition">
                                         <i class="fa-solid fa-xmark"></i> Hapus Foto
+                                    </button>
+                                    <button type="button" onclick="downloadCapturedPhoto('in')" id="inPhotoDownloadBtn" class="hidden px-3 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition">
+                                        <i class="fa-solid fa-download"></i> Unduh Gambar
                                     </button>
                                     <span class="text-xs text-slate-500" id="inPhotoStatus">Belum ada foto</span>
                                 </div>
@@ -1365,7 +1379,11 @@
             t.className = `${colors} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3 text-sm font-medium toast-enter pointer-events-auto max-w-sm`;
             t.innerHTML = `<i class="fa-solid ${icon} text-lg"></i><span>${msg}</span>`;
             document.getElementById('toastContainer').appendChild(t);
-            setTimeout(() => t.remove(), 3500);
+            // Munculkan dengan geser halus (kelas .toast-enter-active sebelumnya tidak pernah dipasang,
+            // sehingga notifikasi tetap tak terlihat), lalu sembunyikan pelan sebelum dihapus.
+            requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('toast-enter-active')));
+            setTimeout(() => { t.style.transition = 'all 0.3s ease'; t.classList.remove('toast-enter-active'); }, 3200);
+            setTimeout(() => t.remove(), 3550);
         }
 
         // --- CHART.JS: plugin pseudo-3D (bayangan) + label nilai pada tiap slice ---
@@ -2101,6 +2119,17 @@
             }
         }
 
+        // Ambil label timestamp & nama aplikasi terbaru dari server tepat sebelum foto digambar,
+        // supaya perubahan dari Admin langsung terpakai di perangkat yang sudah terbuka.
+        async function refreshPhotoSettings() {
+            try {
+                await Promise.race([
+                    Promise.all([loadCustomTimestampLabel(), (typeof loadAppName === 'function' ? loadAppName() : null)]),
+                    new Promise(r => setTimeout(r, 1500))
+                ]);
+            } catch (e) { /* pakai nilai terakhir yang sudah ada */ }
+        }
+
         function openCamera(prefix) {
             const input = document.getElementById(`${prefix}CameraInput`);
             if (input) input.click();
@@ -2113,7 +2142,8 @@
             const reader = new FileReader();
             reader.onload = function(ev) {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = async function() {
+                    await refreshPhotoSettings();
                     const canvas = document.getElementById(`${prefix}PhotoCanvas`);
                     canvas.width = img.width;
                     canvas.height = img.height;
@@ -2148,8 +2178,13 @@
                     }) + ' WIB';
                     const label = CUSTOM_TS_LABEL ? (CUSTOM_TS_LABEL + ' • ' + dateTimePart) : dateTimePart;
 
-                    const fontSize = Math.max(16, Math.round(canvas.width / 30));
+                    let fontSize = Math.max(16, Math.round(canvas.width / 30));
                     ctx.font = `bold ${fontSize}px sans-serif`;
+                    // Kecilkan huruf bila label panjang supaya seluruh teks muat di dalam foto.
+                    while (fontSize > 10 && ctx.measureText(label).width + fontSize * 1.2 > canvas.width - 28) {
+                        fontSize -= 1;
+                        ctx.font = `bold ${fontSize}px sans-serif`;
+                    }
                     const paddingX = fontSize * 0.6, paddingY = fontSize * 0.45;
                     const textWidth = ctx.measureText(label).width;
                     const boxW = textWidth + paddingX * 2;
@@ -2172,6 +2207,8 @@
                     document.getElementById(`${prefix}PhotoStatus`).textContent = `Foto diambil: ${label}`;
                     const clearBtn = document.getElementById(`${prefix}PhotoClearBtn`);
                     if (clearBtn) clearBtn.classList.remove('hidden');
+                    const dlBtn = document.getElementById(`${prefix}PhotoDownloadBtn`);
+                    if (dlBtn) dlBtn.classList.remove('hidden');
 
                     // Foto (yang sudah ada watermark nama & stempel waktu) langsung disimpan
                     // ke galeri/penyimpanan perangkat pengguna, tanpa perlu diminta lagi.
@@ -2183,6 +2220,47 @@
             e.target.value = '';
         }
 
+        /**
+         * Tombol "Unduh Gambar": menyimpan foto (lengkap dengan watermark & stempel waktu) ke perangkat.
+         * - iPhone/iPad: lewat lembar Bagikan; pilih "Simpan Gambar" agar masuk ke galeri Foto.
+         * - Android/komputer: terunduh langsung sebagai file JPG (muncul di galeri/folder Download).
+         * Browser tidak boleh menulis ke galeri secara diam-diam, jadi dua jalur ini yang paling andal.
+         */
+        async function downloadCapturedPhoto(prefix) {
+            const dataUrl = (document.getElementById(`${prefix}PhotoData`) || {}).value;
+            if (!dataUrl) return showToast('Belum ada foto. Ambil foto terlebih dahulu.', 'error');
+            const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+            const fileName = `${(CUSTOM_TS_LABEL || APP_NAME || 'SPPG').replace(/[^a-zA-Z0-9-_]/g, '_')}_${prefix}_${stamp}.jpg`;
+            let blob;
+            try { blob = await (await fetch(dataUrl)).blob(); }
+            catch (e) { return showToast('Gagal menyiapkan gambar.', 'error'); }
+            const file = new File([blob], fileName, { type: 'image/jpeg' });
+            const ua = navigator.userAgent || '';
+            const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const canShare = !!(navigator.canShare && navigator.canShare({ files: [file] }));
+            if (isIOS && canShare) {
+                try {
+                    await navigator.share({ files: [file], title: fileName });
+                    return showToast('Pilih "Simpan Gambar" agar foto masuk ke galeri Foto.', 'success');
+                } catch (e) {
+                    if (e && e.name === 'AbortError') return; // dibatalkan pengguna
+                }
+            }
+            try {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url; a.download = fileName; a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 15000);
+                showToast('Gambar diunduh. Cek galeri atau folder Download.', 'success');
+            } catch (e) {
+                if (canShare) { try { await navigator.share({ files: [file], title: fileName }); return; } catch (e2) { /* lanjut ke pesan gagal */ } }
+                showToast('Gagal mengunduh gambar.', 'error');
+            }
+        }
+
         function resetInPhoto() {
             document.getElementById('inPhotoData').value = '';
             const preview = document.getElementById('inPhotoPreview');
@@ -2190,6 +2268,7 @@
             preview.classList.add('hidden');
             document.getElementById('inPhotoStatus').textContent = 'Belum ada foto';
             document.getElementById('inPhotoClearBtn').classList.add('hidden');
+            const dlBtn = document.getElementById('inPhotoDownloadBtn'); if (dlBtn) dlBtn.classList.add('hidden');
         }
 
         async function handleTransaction(e, type) {
@@ -2858,14 +2937,31 @@
             }
         }
 
-        async function openLicenseWhatsapp() {
-            let waNumber = '6285609930692';
+        // Membuka tautan eksternal (mis. WhatsApp) dengan cara yang aman untuk aplikasi yang
+        // dipasang di layar utama (PWA). window.open setelah proses async sering diblokir di
+        // mode itu, jadi dipakai klik tautan target=_blank yang dijalankan langsung dari aksi pengguna.
+        function openExternalUrl(url) {
             try {
-                const num = await gasRun('getLicenseWhatsappNumber');
-                if (num) waNumber = num;
-            } catch (e) { /* pakai fallback nomor di atas */ }
+                const a = document.createElement('a');
+                a.href = url; a.target = '_blank'; a.rel = 'noopener noreferrer';
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } catch (e) {
+                window.location.href = url;
+            }
+        }
+
+        // Tombol "Minta Kode via WhatsApp" di layar aktivasi: tujuannya penyedia aplikasi
+        // (CONTACT_WA di config.js). Dijalankan langsung tanpa menunggu server, supaya tidak diblokir.
+        function openLicenseWhatsapp() {
+            let waNumber = '6285609930692'; // cadangan bila CONTACT_WA belum diisi
+            try {
+                if (typeof CONTACT_WA !== 'undefined' && /^\d{8,15}$/.test(String(CONTACT_WA))) waNumber = String(CONTACT_WA);
+            } catch (e) { /* pakai cadangan */ }
             const text = encodeURIComponent('Halo, saya butuh kode lisensi instalasi untuk aplikasi ' + APP_NAME + '.');
-            window.open('https://wa.me/' + waNumber + '?text=' + text, '_blank');
+            openExternalUrl('https://wa.me/' + waNumber + '?text=' + text);
         }
 
         // =====================================================================
@@ -3180,7 +3276,7 @@
             text += 'Buka tautan ini untuk masuk ke workspace yang sama: ' + lastOperatorLink.link + '\n';
             text += 'Aplikasi perlu diaktifkan dengan kode lisensi perangkat Anda sendiri saat pertama dibuka, lalu login sebagai Operator (nama + password).';
             const encoded = encodeURIComponent(text);
-            window.open((waNumber ? ('https://wa.me/' + waNumber) : 'https://wa.me/') + '?text=' + encoded, '_blank');
+            openExternalUrl((waNumber ? ('https://wa.me/' + waNumber) : 'https://wa.me/') + '?text=' + encoded);
         }
 
         async function handleDeleteOperator(name) {
@@ -3297,11 +3393,11 @@
             text += 'Aplikasi perlu diaktifkan dengan kode lisensi perangkat Anda sendiri saat pertama dibuka, lalu login sebagai Operator (nama + password).';
             const encoded = encodeURIComponent(text);
             if (waNumber) {
-                window.open('https://wa.me/' + waNumber + '?text=' + encoded, '_blank');
+                openExternalUrl('https://wa.me/' + waNumber + '?text=' + encoded);
             } else {
                 // Tidak ada nomor WA tujuan tersimpan -> buka WhatsApp tanpa nomor tujuan,
                 // Admin tinggal pilih kontak Operator yang dituju secara manual.
-                window.open('https://wa.me/?text=' + encoded, '_blank');
+                openExternalUrl('https://wa.me/?text=' + encoded);
             }
         }
 
@@ -3338,6 +3434,48 @@
         }
 
     </script>
+<script>
+/* ANIMASI HALUS — hanya sebagai respons atas aksi pengguna (buka modal, munculnya kotak/pesan/foto).
+   Memakai pustaka "motion" bila tersedia, cadangan Web Animations API. Mati otomatis jika perangkat
+   memilih "kurangi gerakan". Tidak mengubah tata letak; gaya sementara dibersihkan setelah selesai. */
+(function () {
+    var reduce = function () { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); };
+    function run(el, o, t, dur) {
+        if (!el || reduce()) return;
+        var clean = function () { el.style.removeProperty('opacity'); el.style.removeProperty('transform'); };
+        try {
+            var M = window.Motion, kf = { opacity: [o, 1] };
+            if (t) kf.transform = [t, 'translateY(0px) scale(1)'];
+            if (M && typeof M.animate === 'function') {
+                var c = M.animate(el, kf, { duration: dur, ease: 'easeOut' });
+                if (c && typeof c.then === 'function') c.then(clean, clean); else setTimeout(clean, dur * 1000 + 80);
+            } else if (el.animate) {
+                var f0 = { opacity: o }, f1 = { opacity: 1 };
+                if (t) { f0.transform = t; f1.transform = 'translateY(0px) scale(1)'; }
+                el.animate([f0, f1], { duration: dur * 1000, easing: 'ease-out' });
+            }
+        } catch (e) { clean(); }
+    }
+    function enter(el) {
+        if (el.classList.contains('view-section') || /loading/i.test(el.id || '')) return;
+        if (el.id === 'appContainer') return run(el, 0, null, 0.25);
+        if (el.classList.contains('fixed') && el.classList.contains('inset-0')) {
+            run(el, 0, null, 0.18);
+            if (el.firstElementChild) run(el.firstElementChild, 0, 'translateY(10px) scale(0.97)', 0.24);
+            return;
+        }
+        run(el, 0, 'translateY(6px) scale(1)', 0.2);
+    }
+    if (window.MutationObserver) {
+        new MutationObserver(function (muts) {
+            for (var i = 0; i < muts.length; i++) {
+                var m = muts[i];
+                if (m.attributeName === 'class' && m.oldValue && /(^|\s)hidden(\s|$)/.test(m.oldValue) && !m.target.classList.contains('hidden')) enter(m.target);
+            }
+        }).observe(document.documentElement, { attributes: true, attributeFilter: ['class'], attributeOldValue: true, subtree: true });
+    }
+})();
+</script>
 <script>if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js").catch(console.error));</script>
 </body>
 </html>
