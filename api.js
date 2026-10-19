@@ -97,6 +97,8 @@
 
     // ---------- LISENSI & INFO PUBLIK ----------
     verifyLicenseCode(code) { return rpc('verify_license', { p_code: code }); },
+    // Dicek tiap aplikasi dibuka: apakah kode lisensi di perangkat ini masih berlaku di server.
+    checkLicenseActive(code) { return rpc('license_is_active', { p_code: code }); },
     async getAppName() { const s = await API._settings(); return s.appName || 'SPPG'; },
     async getPublicTimestampLabel() { const s = await API._settings(); return s.timestampLabel || ''; },
     async getLicenseWhatsappNumber() { const s = await API._settings(); return s.waNumber || ''; },
