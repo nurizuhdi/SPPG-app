@@ -1083,16 +1083,17 @@
                                     <option value="IN">Masuk</option>
                                     <option value="OUT">Keluar</option>
                                     <option value="WASTE">Sampah</option>
+                                    <option value="OMPRENG">Ompreng Tidak Dimakan</option>
                                     <option value="CORRECTION">Koreksi Opname</option>
                                 </select>
                                 <input type="month" id="histMonth" onchange="renderHistoryTable()" class="border border-slate-200 rounded-lg py-1.5 px-3 text-sm bg-white outline-none">
                              </div>
                              <div class="flex items-center gap-2 flex-wrap justify-end">
-                                <label class="text-xs text-slate-500 font-medium">Invoice per tanggal:</label>
-                                <input type="date" id="invoiceDate" onchange="if(this.value){document.getElementById('histMonth').value='';}" class="border border-slate-200 rounded-lg py-1.5 px-2.5 text-sm bg-white outline-none" title="Kosongkan untuk memakai filter Bulan di sebelah kiri, atau kosongkan keduanya untuk semua periode">
-                                <button type="button" onclick="document.getElementById('invoiceDate').value=''; generateSupplierInvoice();" class="text-xs text-slate-400 hover:text-slate-600 underline" title="Hapus tanggal, pakai filter Bulan/Semua Periode">reset</button>
-                                <button type="button" onclick="generateSupplierInvoice()" id="downloadInvoiceBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 whitespace-nowrap">
-                                    <i class="fa-solid fa-file-invoice-dollar"></i> Unduh Invoice
+                                <label id="invoiceDateLabel" class="text-xs text-slate-500 font-medium">Invoice per tanggal:</label>
+                                <input type="date" id="invoiceDate" onchange="if(this.value){document.getElementById('histMonth').value='';} renderHistoryTable();" class="border border-slate-200 rounded-lg py-1.5 px-2.5 text-sm bg-white outline-none" title="Kosongkan untuk memakai filter Bulan di sebelah kiri, atau kosongkan keduanya untuk semua periode">
+                                <button type="button" onclick="clearInvoiceDate()" class="text-xs text-slate-400 hover:text-slate-600 underline" title="Hapus tanggal, pakai filter Bulan/Semua Periode">reset</button>
+                                <button type="button" onclick="onHistoryDownload()" id="downloadInvoiceBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 whitespace-nowrap">
+                                    <i class="fa-solid fa-file-invoice-dollar" id="downloadBtnIcon"></i> <span id="downloadBtnText">Unduh Invoice</span>
                                 </button>
                              </div>
                         </div>
@@ -2525,18 +2526,213 @@
         }
 
         // --- HISTORY ---
+        // ---------- Riwayat: Ompreng Tidak Dimakan + tombol unduh data (gambar JPG) ----------
+        const escHist = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        const fmtTgl = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+        const capUser = (u) => { u = String(u || '-'); return u.charAt(0) + u.slice(1).toLowerCase(); };
+        function omprengStatusLabel(st) {
+            return st === 'Sebagian' ? 'Tidak dimakan sebagian' : (st === 'Seluruhnya' ? 'Tidak dimakan seluruhnya' : (st || 'Lainnya'));
+        }
+        function ompRowHtml(o) {
+            const info = (o.price ? formatRp(o.price) + '/ompreng, total ' + formatRp(o.total) : '') + (o.note ? (o.price ? ' — ' : '') + o.note : '');
+            return `
+                    <tr class="hover:bg-slate-50">
+                        <td class="py-3 px-4 text-xs text-slate-500 whitespace-nowrap">${formatDateTime(o.timestamp)}</td>
+                        <td class="py-3 px-4 text-xs font-semibold text-slate-600">${escHist(capUser(o.user))}</td>
+                        <td class="py-3 px-4"><span class="bg-teal-100 text-teal-700 px-2 py-1 rounded text-[10px] font-bold">OMPRENG</span></td>
+                        <td class="py-3 px-4 text-xs font-mono text-slate-500">-</td>
+                        <td class="py-3 px-4 font-bold text-slate-800 text-sm">${escHist(o.type)} <span class="text-xs text-slate-400 font-normal">(${escHist(omprengStatusLabel(o.status))})</span></td>
+                        <td class="py-3 px-4 text-right font-bold text-teal-600">${o.qty} <span class="text-[10px] font-normal text-slate-500">ompreng</span></td>
+                        <td class="py-3 px-4 text-xs text-slate-500">-</td>
+                        <td class="py-3 px-4 text-xs text-slate-500 truncate max-w-[200px]" title="${escHist(info)}">${escHist(info) || '-'}</td>
+                        <td class="py-3 px-4 text-center admin-only text-slate-300">—</td>
+                    </tr>`;
+        }
+
+        // Mode tombol unduh: kategori Sampah / Ompreng → "Unduh Data" (gambar JPG); lainnya → Invoice.
+        function getHistoryMode() {
+            const t = document.getElementById('histType').value;
+            return (t === 'WASTE' || t === 'OMPRENG') ? 'DATA' : 'INVOICE';
+        }
+        function updateHistoryActionButton() {
+            const dataMode = getHistoryMode() === 'DATA';
+            const btn = document.getElementById('downloadInvoiceBtn');
+            if (!btn) return;
+            document.getElementById('downloadBtnText').textContent = dataMode ? 'Unduh Data' : 'Unduh Invoice';
+            document.getElementById('downloadBtnIcon').className = dataMode ? 'fa-solid fa-image' : 'fa-solid fa-file-invoice-dollar';
+            document.getElementById('invoiceDateLabel').textContent = dataMode ? 'Data per tanggal:' : 'Invoice per tanggal:';
+            btn.classList.toggle('bg-teal-600', dataMode); btn.classList.toggle('hover:bg-teal-700', dataMode);
+            btn.classList.toggle('bg-indigo-600', !dataMode); btn.classList.toggle('hover:bg-indigo-700', !dataMode);
+        }
+        function onHistoryDownload() { return getHistoryMode() === 'DATA' ? downloadHistoryDataImage() : generateSupplierInvoice(); }
+        function clearInvoiceDate() {
+            document.getElementById('invoiceDate').value = '';
+            if (getHistoryMode() === 'DATA') renderHistoryTable(); else generateSupplierInvoice();
+        }
+
+        // Menggambar tabel menjadi gambar JPG (bukan CSV/Excel). Dibagi per halaman bila datanya banyak.
+        function renderTableImages(o) {
+            const ROWS = 28, W = 1800, M = 40, HEAD = 176, COLH = 56, ROWH = 64, FOOT = 70;
+            const pages = Math.max(1, Math.ceil(o.rows.length / ROWS));
+            const colX = []; let acc = M; const usable = W - 2 * M;
+            o.cols.forEach(c => { colX.push(acc); acc += c.w * usable; });
+            const fit = (ctx, text, maxW) => { text = String(text == null ? '' : text); if (ctx.measureText(text).width <= maxW) return text; while (text.length > 1 && ctx.measureText(text + '…').width > maxW) text = text.slice(0, -1); return text + '…'; };
+            // Pecah teks menjadi maksimal 2 baris agar isi catatan tidak terpotong.
+            const wrap2 = (ctx, text, maxW) => {
+                text = String(text == null ? '' : text);
+                if (ctx.measureText(text).width <= maxW) return [text];
+                const words = text.split(' '); let l1 = '', i = 0;
+                while (i < words.length && ctx.measureText((l1 ? l1 + ' ' : '') + words[i]).width <= maxW) { l1 += (l1 ? ' ' : '') + words[i]; i++; }
+                if (!l1) return [fit(ctx, text, maxW)];
+                return [l1, fit(ctx, words.slice(i).join(' '), maxW)];
+            };
+            const tasks = [];
+            for (let pg = 0; pg < pages; pg++) {
+                const chunk = o.rows.slice(pg * ROWS, (pg + 1) * ROWS);
+                const last = pg === pages - 1;
+                const canvas = document.createElement('canvas');
+                canvas.width = W; canvas.height = HEAD + COLH + chunk.length * ROWH + (last ? 64 : 0) + FOOT;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, canvas.height);
+                ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, W, HEAD - 20);
+                ctx.fillStyle = '#22c55e'; ctx.fillRect(0, HEAD - 20, W, 6);
+                ctx.fillStyle = '#ffffff'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+                ctx.font = 'bold 40px sans-serif'; ctx.fillText(o.title, M, 48);
+                ctx.font = '24px sans-serif'; ctx.fillStyle = '#cbd5e1';
+                ctx.fillText(o.subtitle, M, 92);
+                ctx.fillText('Dicetak: ' + new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }), M, 122);
+                const y0 = HEAD;
+                ctx.fillStyle = '#e2e8f0'; ctx.fillRect(M - 10, y0, W - 2 * M + 20, COLH);
+                ctx.fillStyle = '#334155'; ctx.font = 'bold 22px sans-serif';
+                o.cols.forEach((c, i) => { ctx.textAlign = c.right ? 'right' : 'left'; ctx.fillText(c.h, c.right ? colX[i] + c.w * usable - 14 : colX[i] + 4, y0 + COLH / 2); });
+                ctx.font = '22px sans-serif';
+                chunk.forEach((r, ri) => {
+                    const y = y0 + COLH + ri * ROWH;
+                    if (ri % 2 === 1) { ctx.fillStyle = '#f8fafc'; ctx.fillRect(M - 10, y, W - 2 * M + 20, ROWH); }
+                    ctx.fillStyle = '#1e293b';
+                    r.forEach((cell, i) => {
+                        const c = o.cols[i]; const maxW = c.w * usable - 20;
+                        ctx.textAlign = c.right ? 'right' : 'left';
+                        const tx = c.right ? colX[i] + c.w * usable - 14 : colX[i] + 4;
+                        if (c.wrap) {
+                            const lines = wrap2(ctx, cell, maxW);
+                            lines.forEach((ln, li) => ctx.fillText(ln, tx, y + ROWH / 2 + (li - (lines.length - 1) / 2) * 26));
+                        } else ctx.fillText(fit(ctx, cell, maxW), tx, y + ROWH / 2);
+                    });
+                    ctx.strokeStyle = '#e2e8f0'; ctx.beginPath(); ctx.moveTo(M - 10, y + ROWH); ctx.lineTo(W - M + 10, y + ROWH); ctx.stroke();
+                });
+                let yy = y0 + COLH + chunk.length * ROWH;
+                if (last) {
+                    ctx.fillStyle = '#0f172a'; ctx.fillRect(M - 10, yy + 8, W - 2 * M + 20, 48);
+                    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'left';
+                    ctx.fillText(o.totalLabel, M + 4, yy + 32);
+                    yy += 64;
+                }
+                ctx.fillStyle = '#64748b'; ctx.font = '20px sans-serif'; ctx.textAlign = 'center';
+                ctx.fillText((typeof APP_NAME !== 'undefined' ? APP_NAME : 'SPPG') + '  •  Halaman ' + (pg + 1) + ' dari ' + pages, W / 2, canvas.height - 32);
+                tasks.push(new Promise(resolve => {
+                    if (canvas.toBlob) canvas.toBlob(b => resolve(b), 'image/jpeg', 0.92);
+                    else fetch(canvas.toDataURL('image/jpeg', 0.92)).then(r => r.blob()).then(resolve);
+                }));
+            }
+            return Promise.all(tasks);
+        }
+
+        // Mengantar file gambar ke pengguna: iPhone lewat lembar Bagikan (Simpan Gambar → Foto),
+        // Android/komputer lewat unduhan langsung (muncul di galeri/folder Download).
+        async function deliverImageFiles(files) {
+            const ua = navigator.userAgent || '';
+            const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const canShare = !!(navigator.canShare && navigator.canShare({ files }));
+            if (isIOS && canShare) {
+                try {
+                    await navigator.share({ files, title: files[0].name });
+                    return showToast('Pilih "Simpan Gambar" agar masuk ke galeri Foto.', 'success');
+                } catch (e) { if (e && e.name === 'AbortError') return; }
+            }
+            for (let i = 0; i < files.length; i++) {
+                const url = URL.createObjectURL(files[i]);
+                const a = document.createElement('a');
+                a.href = url; a.download = files[i].name; a.style.display = 'none';
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 15000);
+                if (i < files.length - 1) await new Promise(r => setTimeout(r, 400));
+            }
+            showToast(files.length > 1 ? files.length + ' gambar diunduh. Cek galeri atau folder Download.' : 'Gambar diunduh. Cek galeri atau folder Download.', 'success');
+        }
+
+        async function downloadHistoryDataImage() {
+            const type = document.getElementById('histType').value;
+            const day = document.getElementById('invoiceDate').value;
+            const month = day ? '' : document.getElementById('histMonth').value;
+            const prefix = day || month;
+            const periodLabel = day
+                ? new Date(day + 'T00:00:00').toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })
+                : (month ? new Date(month + '-01').toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) : 'Seluruh Periode');
+            const byDate = (a, b) => (a.date || '').localeCompare(b.date || '') || (a.timestamp || 0) - (b.timestamp || 0);
+            let title, cols, rows, totalLabel, slug;
+            if (type === 'WASTE') {
+                const list = db.transactions.filter(t => t.type === 'WASTE' && (!prefix || (t.date || '').startsWith(prefix))).sort(byDate);
+                let sum = 0;
+                rows = list.map((t, i) => {
+                    const p = db.products.find(x => String(x.id) === String(t.productId));
+                    const nilai = Number(t.total) || (t.qty * (Number(t.price) || 0)); sum += nilai;
+                    return [String(i + 1), fmtTgl(t.date), p ? p.code : (t.productCode || '-'), p ? p.name : 'Unknown', t.qty + ' ' + (p ? p.unit : ''), formatRp(nilai), t.note || '-', capUser(t.user)];
+                });
+                title = 'Data Sampah Bahan Baku'; slug = 'Sampah';
+                cols = [{ h: 'No', w: .035 }, { h: 'Tanggal', w: .10 }, { h: 'Kode', w: .08 }, { h: 'Barang', w: .17, wrap: true }, { h: 'Jumlah', w: .09, right: true }, { h: 'Nilai', w: .11, right: true }, { h: 'Alasan / Catatan', w: .32, wrap: true }, { h: 'Oleh', w: .095 }];
+                totalLabel = 'TOTAL: ' + list.length + ' catatan   •   Nilai ' + formatRp(sum);
+            } else {
+                const list = (db.omprengUtuh || []).filter(t => !prefix || (t.date || '').startsWith(prefix)).sort(byDate);
+                let sumQty = 0, sumRp = 0;
+                rows = list.map((t, i) => {
+                    sumQty += t.qty; sumRp += t.total;
+                    return [String(i + 1), fmtTgl(t.date), omprengStatusLabel(t.status), t.type || '-', String(t.qty), formatRp(t.price), formatRp(t.total), t.note || '-', capUser(t.user)];
+                });
+                title = 'Data Ompreng Tidak Dimakan'; slug = 'Ompreng';
+                cols = [{ h: 'No', w: .035 }, { h: 'Tanggal', w: .10 }, { h: 'Status', w: .20, wrap: true }, { h: 'Nama Bahan', w: .14, wrap: true }, { h: 'Jumlah', w: .07, right: true }, { h: 'Harga', w: .09, right: true }, { h: 'Total', w: .10, right: true }, { h: 'Catatan', w: .17, wrap: true }, { h: 'Oleh', w: .095 }];
+                totalLabel = 'TOTAL: ' + rows.length + ' catatan   •   ' + sumQty + ' ompreng   •   ' + formatRp(sumRp);
+            }
+            if (rows.length === 0) return showToast('Tidak ada data ' + title.replace('Data ', '') + ' pada periode ini.', 'error');
+            const btn = document.getElementById('downloadInvoiceBtn');
+            if (btn) btn.disabled = true;
+            try {
+                const blobs = await renderTableImages({ title, subtitle: (typeof APP_NAME !== 'undefined' ? APP_NAME : 'SPPG') + '  •  Periode: ' + periodLabel, cols, rows, totalLabel });
+                const base = (typeof APP_NAME !== 'undefined' ? APP_NAME : 'SPPG').replace(/[^a-zA-Z0-9-_]/g, '_') + '_' + slug + '_' + (prefix || 'semua');
+                const files = blobs.map((b, i) => new File([b], base + (blobs.length > 1 ? '_hal' + (i + 1) : '') + '.jpg', { type: 'image/jpeg' }));
+                await deliverImageFiles(files);
+            } catch (e) {
+                showToast('Gagal membuat gambar: ' + (e && e.message ? e.message : e), 'error');
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        }
+
         function renderHistoryTable() {
             const tbody = document.getElementById('historyTableBody');
             const typeFilter = document.getElementById('histType').value;
             const monthFilter = document.getElementById('histMonth').value;
             tbody.innerHTML = '';
 
-            let data = [...db.transactions].sort((a,b) => b.timestamp - a.timestamp);
+            updateHistoryActionButton();
+            // Tanggal spesifik ikut menyaring tabel hanya pada mode "Unduh Data" (Sampah / Ompreng).
+            const dayFilter = getHistoryMode() === 'DATA' ? document.getElementById('invoiceDate').value : '';
+            const prefix = dayFilter || monthFilter;
+            let trxList = typeFilter === 'OMPRENG' ? [] : [...db.transactions];
+            if (typeFilter !== 'ALL' && typeFilter !== 'OMPRENG') trxList = trxList.filter(t => t.type === typeFilter);
+            let ompList = (typeFilter === 'ALL' || typeFilter === 'OMPRENG') ? [...(db.omprengUtuh || [])] : [];
+            if (prefix) {
+                trxList = trxList.filter(t => (t.date || '').startsWith(prefix));
+                ompList = ompList.filter(o => (o.date || '').startsWith(prefix));
+            }
+            const data = [
+                ...trxList.map(t => ({ k: 'T', ts: t.timestamp || 0, t })),
+                ...ompList.map(o => ({ k: 'O', ts: o.timestamp || 0, o }))
+            ].sort((a, b) => b.ts - a.ts);
 
-            if(typeFilter !== 'ALL') data = data.filter(t => t.type === typeFilter);
-            if(monthFilter) data = data.filter(t => (t.date||'').startsWith(monthFilter));
-
-            data.forEach(t => {
+            data.forEach(item => {
+                if (item.k === 'O') { tbody.innerHTML += ompRowHtml(item.o); return; }
+                const t = item.t;
                 const p = db.products.find(x => String(x.id) === String(t.productId));
                 const pName = p ? p.name : 'Unknown';
                 const pUnit = p ? p.unit : '';
@@ -2903,13 +3099,33 @@
         // =====================================================================
         // LICENSE GATE (kode lisensi 1x pakai)
         // =====================================================================
-        function hasLicensePassed() {
-            try { return localStorage.getItem('sppg_license_ok') === '1'; }
-            catch (e) { return !!window.__sppgLicenseOkTemp; }
+        // Kode lisensi yang sudah diaktifkan disimpan di perangkat ini saja, lalu dicek ulang ke
+        // server setiap aplikasi dibuka. Bila lisensinya direset/dicabut, perangkat diminta aktivasi
+        // ulang. Tidak ada ID perangkat atau aktivitas yang dikirim ke server.
+        const LICENSE_KEY = 'sppg_license_code';
+        function getStoredLicense() {
+            try { return localStorage.getItem(LICENSE_KEY) || ''; }
+            catch (e) { return window.__sppgLicenseTemp || ''; }
         }
-        function markLicensePassed() {
-            try { localStorage.setItem('sppg_license_ok', '1'); }
-            catch (e) { window.__sppgLicenseOkTemp = true; }
+        function markLicensePassed(code) {
+            const c = String(code || '').trim().toUpperCase();
+            try { localStorage.setItem(LICENSE_KEY, c); localStorage.removeItem('sppg_license_ok'); }
+            catch (e) { window.__sppgLicenseTemp = c; }
+        }
+        function clearStoredLicense() {
+            try { localStorage.removeItem(LICENSE_KEY); localStorage.removeItem('sppg_license_ok'); } catch (e) { /* abaikan */ }
+            window.__sppgLicenseTemp = '';
+        }
+        async function hasLicensePassed() {
+            const code = getStoredLicense();
+            if (!code) return false;
+            try {
+                const active = await gasRun('checkLicenseActive', code);
+                if (active === false) { clearStoredLicense(); return false; }
+                return true;
+            } catch (e) {
+                return true; // gangguan jaringan: jangan mengunci perangkat yang sudah aktivasi
+            }
         }
 
         async function submitLicenseCode(e) {
@@ -2922,7 +3138,7 @@
             try {
                 const res = await gasRun('verifyLicenseCode', code);
                 if (res && res.success) {
-                    markLicensePassed();
+                    markLicensePassed(code);
                     document.getElementById('licenseGateScreen').classList.add('hidden');
                     await proceedAfterLicenseGate();
                 } else {
@@ -3193,7 +3409,7 @@
             document.getElementById('licenseGateScreen').classList.add('hidden');
             loadAppName();
             loadCustomTimestampLabel();
-            if (!hasLicensePassed()) {
+            if (!(await hasLicensePassed())) {
                 document.getElementById('licenseGateScreen').classList.remove('hidden');
                 const codeInput = document.getElementById('licenseCodeInput');
                 if (codeInput && INITIAL_LICENSE_CODE) codeInput.value = INITIAL_LICENSE_CODE;
