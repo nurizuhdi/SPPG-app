@@ -364,42 +364,42 @@
                     <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Transaksi</p>
                 </div>
                 <button onclick="nav('masuk')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="masuk">
-                    <img src="icons/barang_masuk.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Barang Masuk
+                    <img src="barang_masuk.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Barang Masuk
                 </button>
                 <button onclick="nav('keluar')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="keluar">
-                    <img src="icons/barang_keluar.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Barang Keluar
+                    <img src="barang_keluar.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Barang Keluar
                 </button>
                 <button onclick="nav('sampah_bahan')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="sampah_bahan">
-                    <img src="icons/sampah_bahan.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Sampah Bahan
+                    <img src="sampah_bahan.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Sampah Bahan
                 </button>
                 <button onclick="nav('ompreng_utuh')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="ompreng_utuh">
-                    <img src="icons/ompreng_tidak_dimakan.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Ompreng Tidak Dimakan
+                    <img src='ompreng_tidak_dimakan.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Ompreng Tidak Dimakan
                 </button>
 
                 <div class="pt-4 pb-1">
                     <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Inventory</p>
                 </div>
                 <button onclick="nav('opname')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="opname">
-                    <img src="icons/stock_opname.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Stock Opname
+                    <img src="stock_opname.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Stock Opname
                 </button>
                 <button onclick="nav('master')" class="nav-btn admin-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="master">
-                    <img src="icons/master_barang.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Master Barang
+                    <img src="master_barang.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Master Barang
                 </button>
                 <button onclick="nav('operator')" class="nav-btn admin-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="operator">
-                    <img src="icons/create_operator.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Create Operator
+                    <img src="create_operator.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Create Operator
                 </button>
 
                 <div class="pt-4 pb-1">
                     <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Laporan & Histori</p>
                 </div>
                 <button onclick="nav('riwayat')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="riwayat">
-                    <img src="icons/riwayat_transaksi.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Riwayat Transaksi
+                    <img src="riwayat_transaksi.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Riwayat Transaksi
                 </button>
                 <button onclick="nav('laporan')" class="nav-btn admin-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="laporan">
-                    <img src="icons/laporan_export.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Laporan & Export
+                    <img src="laporan_export.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Laporan & Export
                 </button>
                 <button onclick="nav('settings')" class="nav-btn admin-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="settings">
-                    <img src="icons/pengaturan.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Pengaturan
+                    <img src="pengaturan.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Pengaturan
                 </button>
             </div>
 
@@ -1544,11 +1544,11 @@
             document.getElementById('userAvatar').className = `w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${role === 'ADMIN' ? 'bg-indigo-600' : 'bg-blue-500'}`;
             if (role === 'ADMIN') {
                 const av = document.getElementById('userAvatar');
-                av.innerHTML = '<img src="icons/admin.png" alt="Admin" class="w-7 h-7 object-contain">';
+                av.innerHTML = '<img src="admin.png" alt="Admin" class="w-7 h-7 object-contain">';
                 av.className = 'w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center';
             } else {
                 const av = document.getElementById('userAvatar');
-                av.innerHTML = '<img src="icons/operator.png" alt="Operator" class="w-7 h-7 object-contain">';
+                av.innerHTML = '<img src="operator.png" alt="Operator" class="w-7 h-7 object-contain">';
                 av.className = 'w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center';
             };
 
@@ -1700,7 +1700,7 @@
         const chartMeta = {};
         const chartLogo = new Image();
         chartLogo.onload = () => Object.values(dashboardCharts).forEach(c => { try { if (c && c.draw) c.draw(); } catch (e) { /* abaikan */ } });
-        chartLogo.src = 'icons/chart_logo.png';
+        chartLogo.src = 'chart_logo.png';
 
         const donutPlugin = {
             id: 'sppgDonut',
