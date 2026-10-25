@@ -35,7 +35,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script>
 
     <!-- SheetJS (Excel Export) -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
@@ -92,13 +92,32 @@
             button { transition: transform 0.12s ease, background-color 0.15s ease, opacity 0.15s ease; }
             button:not([disabled]):active, .nav-btn:active { transform: scale(0.97); }
         }
+        /* Efek timbul saat kursor diarahkan ke tombol (hanya perangkat dengan kursor, dan mati bila
+           pengguna memilih "kurangi gerakan"). Menu samping bergeser tipis ke kanan. */
+        @media (prefers-reduced-motion: no-preference) {
+            button { transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease, opacity 0.15s ease; }
+        }
+        @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+            button:not([disabled]):hover { transform: translateY(-2px); box-shadow: 0 8px 16px -6px rgba(15, 23, 42, 0.35); }
+            .nav-btn:not([disabled]):hover { transform: translateX(3px); box-shadow: none; }
+            button:not([disabled]):active { transform: scale(0.97); box-shadow: none; }
+        }
+        .nav-btn { text-align: left; }
+        .nav-ico { width: 1.75rem; height: 1.75rem; flex: none; object-fit: contain; background: #f1f5f9; border-radius: 0.5rem; padding: 2px; }
         @media (prefers-reduced-motion: reduce) {
-            .view-section.active, .animate-fade-in, .animate-slide-up { animation: none; }
+            .view-section.active, #view-dashboard.active, #view-dashboard.active > *, .animate-fade-in, .animate-slide-up { animation: none; }
         }
 
         /* Layout Transitions */
         .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.4s ease; }
+        .view-section.active { display: block; animation: sppgViewIn 0.45s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+        @keyframes sppgViewIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        /* Dashboard: halaman memudar masuk, lalu blok-bloknya muncul berurutan */
+        #view-dashboard.active { animation: fadeIn 0.3s ease both; }
+        #view-dashboard.active > * { animation: sppgViewIn 0.5s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+        #view-dashboard.active > *:nth-child(2) { animation-delay: 0.08s; }
+        #view-dashboard.active > *:nth-child(3) { animation-delay: 0.16s; }
+        #view-dashboard.active > *:nth-child(4) { animation-delay: 0.24s; }
 
         /* Active nav accent */
         .nav-btn { position: relative; overflow: hidden; }
@@ -116,6 +135,7 @@
             border-radius: 1rem;
         }
         .chart-3d-wrap::after {
+            display: none;
             content: '';
             position: absolute;
             left: 10%; right: 10%; bottom: -6px; height: 18px;
@@ -149,11 +169,11 @@
                     <label class="block text-sm font-medium text-slate-700 mb-1">Pilih Peran Akses</label>
                     <div class="grid grid-cols-2 gap-3">
                         <button onclick="openAdminLogin()" class="py-4 sm:py-3 border-2 border-slate-200 rounded-xl hover:border-primary-500 hover:bg-primary-50 active:bg-primary-50 active:scale-[0.97] text-slate-600 font-semibold transition group flex flex-col items-center">
-                            <i class="fa-solid fa-user-shield text-2xl mb-1 text-slate-500 group-hover:text-primary-600"></i>
+                            <img src="icons/admin.png" alt="" class="h-10 w-10 object-contain mb-1" width="40" height="40">
                             Admin
                         </button>
                         <button onclick="openOperatorLogin()" class="py-4 sm:py-3 border-2 border-slate-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 active:bg-blue-50 active:scale-[0.97] text-slate-600 font-semibold transition group flex flex-col items-center">
-                            <i class="fa-solid fa-user text-2xl mb-1 text-slate-500 group-hover:text-blue-600"></i>
+                            <img src="icons/operator.png" alt="" class="h-10 w-10 object-contain mb-1" width="40" height="40">
                             Operator
                         </button>
                     </div>
@@ -344,42 +364,42 @@
                     <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Transaksi</p>
                 </div>
                 <button onclick="nav('masuk')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="masuk">
-                    <i class="fa-solid fa-arrow-right-to-bracket text-emerald-400 w-5 text-center"></i> Barang Masuk
+                    <img src="icons/barang_masuk.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Barang Masuk
                 </button>
                 <button onclick="nav('keluar')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="keluar">
-                    <i class="fa-solid fa-arrow-right-from-bracket text-rose-400 w-5 text-center"></i> Barang Keluar
+                    <img src="icons/barang_keluar.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Barang Keluar
                 </button>
                 <button onclick="nav('sampah_bahan')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="sampah_bahan">
-                    <i class="fa-solid fa-trash-can text-amber-400 w-5 text-center"></i> Sampah Bahan
+                    <img src="icons/sampah_bahan.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Sampah Bahan
                 </button>
                 <button onclick="nav('ompreng_utuh')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="ompreng_utuh">
-                    <i class="fa-solid fa-plate-wheat text-orange-400 w-5 text-center"></i> Ompreng Utuh/Tdk Dimakan
+                    <img src="icons/ompreng_tidak_dimakan.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Ompreng Tidak Dimakan
                 </button>
 
                 <div class="pt-4 pb-1">
                     <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Inventory</p>
                 </div>
                 <button onclick="nav('opname')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="opname">
-                    <i class="fa-solid fa-clipboard-check text-blue-400 w-5 text-center"></i> Stock Opname
+                    <img src="icons/stock_opname.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Stock Opname
                 </button>
                 <button onclick="nav('master')" class="nav-btn admin-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="master">
-                    <i class="fa-solid fa-boxes-stacked w-5 text-center"></i> Master Barang
+                    <img src="icons/master_barang.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Master Barang
                 </button>
                 <button onclick="nav('operator')" class="nav-btn admin-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="operator">
-                    <i class="fa-solid fa-user-gear w-5 text-center"></i> Create Operator
+                    <img src="icons/create_operator.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Create Operator
                 </button>
 
                 <div class="pt-4 pb-1">
                     <p class="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">Laporan & Histori</p>
                 </div>
                 <button onclick="nav('riwayat')" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="riwayat">
-                    <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i> Riwayat Transaksi
+                    <img src="icons/riwayat_transaksi.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Riwayat Transaksi
                 </button>
                 <button onclick="nav('laporan')" class="nav-btn admin-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="laporan">
-                    <i class="fa-solid fa-file-invoice w-5 text-center"></i> Laporan & Export
+                    <img src="icons/laporan_export.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Laporan & Export
                 </button>
                 <button onclick="nav('settings')" class="nav-btn admin-only w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-slate-800 hover:text-white transition" data-target="settings">
-                    <i class="fa-solid fa-gear w-5 text-center"></i> Pengaturan
+                    <img src="icons/pengaturan.png" alt="" class="nav-ico" width="28" height="28" loading="lazy"> Pengaturan
                 </button>
             </div>
 
@@ -431,7 +451,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Nilai Stok</p>
-                                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="dashTotalValue">Rp 0</h3>
+                                    <h3 class="text-2xl font-bold text-slate-800 mt-1" id="dashTotalValue">0</h3>
                                 </div>
                                 <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-wallet"></i></div>
                             </div>
@@ -442,7 +462,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nominal Pemasukan Hari Ini</p>
-                                    <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="dashInToday">Rp 0</h3>
+                                    <h3 class="text-2xl font-bold text-emerald-600 mt-1" id="dashInToday">0</h3>
                                 </div>
                                 <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-arrow-right-to-bracket"></i></div>
                             </div>
@@ -453,7 +473,7 @@
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nominal Pengeluaran Hari Ini</p>
-                                    <h3 class="text-2xl font-bold text-rose-600 mt-1" id="dashOutToday">Rp 0</h3>
+                                    <h3 class="text-2xl font-bold text-rose-600 mt-1" id="dashOutToday">0</h3>
                                 </div>
                                 <div class="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center text-lg"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
                             </div>
@@ -486,15 +506,15 @@
                     <!-- Charts Area -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col chart-3d-wrap">
-                            <h4 class="font-bold text-slate-800 mb-4">Perbandingan Nominal Pemasukan & Pengeluaran (Bulan Ini)</h4>
+                            <div class="flex items-start justify-between gap-3 mb-4"><h4 class="font-bold text-slate-800">Perbandingan Nominal Pemasukan & Pengeluaran (Bulan Ini)</h4><span class="admin-only text-[11px] text-slate-400 whitespace-nowrap"><i class="fa-solid fa-download"></i> Klik grafik untuk unduh PNG</span></div>
                             <div class="flex-1 flex items-center justify-center relative">
-                                <canvas id="chartTransactions" height="220" style="max-height: 260px;"></canvas>
+                                <canvas id="chartTransactions" height="300" style="max-height: 300px;"></canvas>
                             </div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col chart-3d-wrap">
-                            <h4 class="font-bold text-slate-800 mb-4">Statistik Sampah Bahan & Ompreng Tidak Termakan (Bulan Ini)</h4>
+                            <div class="flex items-start justify-between gap-3 mb-4"><h4 class="font-bold text-slate-800">Statistik Sampah Bahan & Ompreng Tidak Termakan (Bulan Ini)</h4><span class="admin-only text-[11px] text-slate-400 whitespace-nowrap"><i class="fa-solid fa-download"></i> Klik grafik untuk unduh PNG</span></div>
                             <div class="flex-1 flex items-center justify-center relative">
-                                <canvas id="chartWaste" height="220" style="max-height: 260px;"></canvas>
+                                <canvas id="chartWaste" height="300" style="max-height: 300px;"></canvas>
                             </div>
                         </div>
                     </div>
@@ -503,7 +523,7 @@
                     <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 chart-3d-wrap">
                         <div class="flex justify-between items-center mb-4">
                             <h4 class="font-bold text-slate-800">Total Penggunaan Semua Bahan Baku (dari Barang Keluar)</h4>
-                            <span class="text-xs text-slate-400">Seluruh histori • per satuan barang</span>
+                            <span class="text-xs text-slate-400">Seluruh histori • per satuan barang <span class="admin-only">• Klik grafik untuk unduh PNG</span></span>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
                             <div class="lg:col-span-2 relative" style="min-height: 320px;">
@@ -546,7 +566,6 @@
                                         <th class="py-3 px-4">Nama Barang</th>
                                         <th class="py-3 px-4">Kategori</th>
                                         <th class="py-3 px-4">Satuan</th>
-                                        <th class="py-3 px-4 text-right">Harga Standar</th>
                                         <th class="py-3 px-4 text-center">Min. Stok</th>
                                         <th class="py-3 px-4 text-center">Aksi</th>
                                     </tr>
@@ -742,8 +761,8 @@
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                                 <div><label class="block text-xs font-semibold text-slate-600 mb-1">Jumlah Keluar</label><input type="number" id="outQty" required min="0.01" step="any" oninput="calcTotal('out')" class="w-full border border-rose-300 focus:ring-rose-500 focus:border-rose-500 rounded-lg p-2.5 text-sm font-bold"></div>
-                                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Harga Satuan (HPP)</label><input type="number" id="outPrice" required readonly class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-500"></div>
-                                <div><label class="block text-xs font-semibold text-slate-600 mb-1">Total Harga</label><input type="text" id="outTotalDisplay" readonly class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm font-bold text-rose-700"></div>
+                                <div style="display:none"><label class="block text-xs font-semibold text-slate-600 mb-1">Harga Satuan (HPP)</label><input type="number" id="outPrice" required readonly class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm text-slate-500"></div>
+                                <div style="display:none"><label class="block text-xs font-semibold text-slate-600 mb-1">Total Harga</label><input type="text" id="outTotalDisplay" readonly class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-sm font-bold text-rose-700"></div>
                             </div>
 
                             <div>
@@ -1088,7 +1107,7 @@
                                 </select>
                                 <input type="month" id="histMonth" onchange="renderHistoryTable()" class="border border-slate-200 rounded-lg py-1.5 px-3 text-sm bg-white outline-none">
                              </div>
-                             <div class="flex items-center gap-2 flex-wrap justify-end">
+                             <div class="admin-only flex items-center gap-2 flex-wrap justify-end">
                                 <label id="invoiceDateLabel" class="text-xs text-slate-500 font-medium">Invoice per tanggal:</label>
                                 <input type="date" id="invoiceDate" onchange="if(this.value){document.getElementById('histMonth').value='';} renderHistoryTable();" class="border border-slate-200 rounded-lg py-1.5 px-2.5 text-sm bg-white outline-none" title="Kosongkan untuk memakai filter Bulan di sebelah kiri, atau kosongkan keduanya untuk semua periode">
                                 <button type="button" onclick="clearInvoiceDate()" class="text-xs text-slate-400 hover:text-slate-600 underline" title="Hapus tanggal, pakai filter Bulan/Semua Periode">reset</button>
@@ -1107,6 +1126,7 @@
                                         <th class="py-3 px-4">Kode</th>
                                         <th class="py-3 px-4">Barang</th>
                                         <th class="py-3 px-4 text-right">Jumlah</th>
+                                        <th class="py-3 px-4 text-right">Nominal</th>
                                         <th class="py-3 px-4">Kadaluarsa</th>
                                         <th class="py-3 px-4">Catatan</th>
                                         <th class="py-3 px-4 text-center admin-only">Aksi</th>
@@ -1115,6 +1135,7 @@
                                 <tbody id="historyTableBody" class="divide-y divide-slate-100"></tbody>
                             </table>
                         </div>
+                        <div id="historySummary" class="shrink-0 border-t border-slate-200 bg-slate-50 px-4 py-3 text-sm flex flex-wrap items-center gap-x-6 gap-y-1"></div>
                      </div>
                 </section>
 
@@ -1145,7 +1166,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div><label class="block text-xs font-semibold text-slate-600 mb-1">Satuan</label><input type="text" id="mUnit" required placeholder="Kg/Ltr/Pcs" class="w-full border border-slate-300 rounded-lg p-2 text-sm"></div>
                     <div><label class="block text-xs font-semibold text-slate-600 mb-1">Min. Stok</label><input type="number" id="mMin" required value="0" min="0" class="w-full border border-slate-300 rounded-lg p-2 text-sm"></div>
-                    <div><label class="block text-xs font-semibold text-slate-600 mb-1">Hrg Standar(Rp)</label><input type="number" id="mPrice" required min="0" class="w-full border border-slate-300 rounded-lg p-2 text-sm"></div>
+                    <input type="hidden" id="mPrice" value="0">
                 </div>
                 <div class="pt-4 flex justify-end gap-3 mt-4">
                     <button type="button" onclick="closeMasterModal()" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg font-medium text-sm">Batal</button>
@@ -1427,7 +1448,8 @@
                 }
             };
         }
-        if (typeof Chart !== 'undefined') { Chart.register(shadow3DPlugin); }
+        // Efek bayangan 3D lama dimatikan: grafik donut kini bergaya datar sesuai acuan.
+        // if (typeof Chart !== 'undefined') { Chart.register(shadow3DPlugin); }
 
         // --- AUTH & NAVIGATION ---
                 function openAdminLogin() {
@@ -1520,6 +1542,15 @@
             if (displayName) document.getElementById('userNameDisplay').textContent = displayName;
             document.getElementById('userAvatar').textContent = role.charAt(0);
             document.getElementById('userAvatar').className = `w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${role === 'ADMIN' ? 'bg-indigo-600' : 'bg-blue-500'}`;
+            if (role === 'ADMIN') {
+                const av = document.getElementById('userAvatar');
+                av.innerHTML = '<img src="icons/admin.png" alt="Admin" class="w-7 h-7 object-contain">';
+                av.className = 'w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center';
+            } else {
+                const av = document.getElementById('userAvatar');
+                av.innerHTML = '<img src="icons/operator.png" alt="Operator" class="w-7 h-7 object-contain">';
+                av.className = 'w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center';
+            };
 
             const adminEls = document.querySelectorAll('.admin-only');
             adminEls.forEach(el => el.style.display = role === 'ADMIN' ? '' : 'none');
@@ -1631,10 +1662,10 @@
 
             const expiringBatches = getExpiringBatches(EXPIRY_WARNING_DAYS);
 
-            document.getElementById('dashTotalValue').textContent = formatRp(valStok);
-            document.getElementById('dashInToday').textContent = formatRp(valIn);
+            document.getElementById('dashTotalValue').textContent = dashNum(valStok);
+            document.getElementById('dashInToday').textContent = dashNum(valIn);
             document.getElementById('dashValInToday').textContent = `${inCountToday} transaksi hari ini`;
-            document.getElementById('dashOutToday').textContent = formatRp(valOut);
+            document.getElementById('dashOutToday').textContent = dashNum(valOut);
             document.getElementById('dashValOutToday').textContent = `${outCountToday} transaksi hari ini`;
             document.getElementById('dashLowStock').textContent = `${lowStock} Item`;
             document.getElementById('dashExpiring').textContent = `${expiringBatches.length} Batch`;
@@ -1661,62 +1692,141 @@
             document.getElementById('statOmpValue').textContent = formatRp(valOmpreng);
         }
 
-        function renderCharts(valInMonth, valOutMonth, wasteData) {
-            const ctxTx = document.getElementById('chartTransactions').getContext('2d');
-            if(dashboardCharts.tx) dashboardCharts.tx.destroy();
+        // ---------- Grafik donut bergaya baru (acuan: gambar donut dari pengguna) ----------
+        // Warna dari gambar acuan; angka berupa NOMINAL (bukan persen) dan tanpa tulisan "Rp";
+        // bagian tengah hanya memuat logo.
+        const DONUT_COLORS = ['#3582f9', '#50ba6a', '#fdb92c', '#f66180', '#936bed', '#a1acc2'];
+        const dashNum = (v) => formatRp(v).replace(/^Rp\s?/, '');
+        const chartMeta = {};
+        const chartLogo = new Image();
+        chartLogo.onload = () => Object.values(dashboardCharts).forEach(c => { try { if (c && c.draw) c.draw(); } catch (e) { /* abaikan */ } });
+        chartLogo.src = 'icons/chart_logo.png';
 
-            dashboardCharts.tx = new Chart(ctxTx, {
-                type: 'pie',
-                data: {
-                    labels: ['Pemasukan (Rp)', 'Pengeluaran (Rp)'],
-                    datasets: [{
-                        data: [valInMonth, valOutMonth],
-                        backgroundColor: [
-                            ctxTx.createLinearGradient(0,0,0,260) && (() => { const g = ctxTx.createLinearGradient(0,0,0,260); g.addColorStop(0,'#4ade80'); g.addColorStop(1,'#15803d'); return g; })(),
-                            (() => { const g = ctxTx.createLinearGradient(0,0,0,260); g.addColorStop(0,'#fb7185'); g.addColorStop(1,'#9f1239'); return g; })()
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${formatRp(ctx.parsed)}` } }
-                    }
-                },
-                plugins: [makeValueLabelPlugin((v) => formatRp(v))]
-            });
+        const donutPlugin = {
+            id: 'sppgDonut',
+            afterDatasetsDraw(chart, args, opt) {
+                const ctx = chart.ctx, meta = chart.getDatasetMeta(0), ds = chart.data.datasets[0];
+                if (!meta || !meta.data.length) return;
+                const c0 = meta.data[0];
+                if (!(opt && opt.empty)) {
+                    meta.data.forEach((arc, i) => {
+                        const v = ds.data[i]; if (!v) return;
+                        const mid = (arc.startAngle + arc.endAngle) / 2, rad = (arc.innerRadius + arc.outerRadius) / 2;
+                        const thick = arc.outerRadius - arc.innerRadius, arcLen = (arc.endAngle - arc.startAngle) * rad;
+                        const avail = Math.abs(Math.cos(mid)) * thick + Math.abs(Math.sin(mid)) * arcLen - 8;
+                        const text = String(opt.format(v, i));
+                        let fs = 14; ctx.save(); ctx.font = 'bold ' + fs + 'px Inter, sans-serif';
+                        while (fs > 9 && ctx.measureText(text).width > avail) { fs--; ctx.font = 'bold ' + fs + 'px Inter, sans-serif'; }
+                        if (ctx.measureText(text).width <= avail + 4) {
+                            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                            ctx.shadowColor = 'rgba(15,23,42,0.35)'; ctx.shadowBlur = 3;
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillText(text, arc.x + Math.cos(mid) * rad, arc.y + Math.sin(mid) * rad);
+                        }
+                        ctx.restore();
+                    });
+                }
+                if (chartLogo.complete && chartLogo.naturalWidth) {
+                    const s = Math.min(c0.innerRadius * 1.15, 76);
+                    ctx.drawImage(chartLogo, c0.x - s / 2, c0.y - s / 2, s, s);
+                }
+            }
+        };
 
-            const ctxWaste = document.getElementById('chartWaste').getContext('2d');
-            if(dashboardCharts.waste) dashboardCharts.waste.destroy();
-
-            renderOmprengStats();
-            const { valOmpreng } = computeOmprengMonthlyStats();
-            let valBahan = Object.values(wasteData).reduce((a,b)=>a+b, 0);
-
-            dashboardCharts.waste = new Chart(ctxWaste, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Kerugian Bahan Baku', 'Ompreng Tidak Termakan'],
-                    datasets: [{
-                        data: [valBahan, valOmpreng],
-                        backgroundColor: [
-                            (() => { const g = ctxWaste.createLinearGradient(0,0,0,260); g.addColorStop(0,'#fbbf24'); g.addColorStop(1,'#b45309'); return g; })(),
-                            (() => { const g = ctxWaste.createLinearGradient(0,0,0,260); g.addColorStop(0,'#fb923c'); g.addColorStop(1,'#c2410c'); return g; })()
-                        ],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: {position: 'bottom'} } },
-                plugins: [makeValueLabelPlugin((v) => formatRp(v))]
-            });
+        function bindChartDownload(canvasId, key) {
+            const c = document.getElementById(canvasId); if (!c) return;
+            const admin = currentUser === 'ADMIN';
+            c.style.cursor = admin ? 'pointer' : 'default';
+            c.title = admin ? 'Klik untuk mengunduh grafik (PNG)' : '';
+            c.onclick = admin ? () => exportChartPng(key) : null;
         }
 
-        // Chart baru menggantikan tabel "Status Stok Terkini": total penggunaan bahan baku
-        // (jumlah keluar) untuk SETIAP barang, sepanjang histori transaksi Barang Keluar.
+        function buildDonut(canvasId, key, o) {
+            const canvas = document.getElementById(canvasId); if (!canvas) return;
+            if (dashboardCharts[key]) dashboardCharts[key].destroy();
+            const total = o.values.reduce((a, b) => a + b, 0), empty = !(total > 0);
+            chartMeta[key] = { canvasId, title: o.title, subtitle: o.subtitle, labels: o.labels, values: o.values, colors: o.colors, fmt: o.fmt, rows: o.rows || null, showTotal: !!o.showTotal, total, empty };
+            dashboardCharts[key] = new Chart(canvas.getContext('2d'), {
+                type: 'doughnut',
+                data: { labels: empty ? ['Belum ada data'] : o.labels, datasets: [{ data: empty ? [1] : o.values, backgroundColor: empty ? ['#e2e8f0'] : o.colors, borderColor: '#ffffff', borderWidth: 3, hoverOffset: 6 }] },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '48%',
+                    devicePixelRatio: Math.max(window.devicePixelRatio || 1, 2),
+                    plugins: {
+                        sppgDonut: { empty, format: o.fmt },
+                        legend: o.legend === false ? { display: false } : {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true, pointStyle: 'circle', boxWidth: 10, padding: 16, color: '#334155', font: { size: 12 },
+                                generateLabels: (chart) => {
+                                    const lg = (Chart.overrides && Chart.overrides.doughnut && Chart.overrides.doughnut.plugins && Chart.overrides.doughnut.plugins.legend) ? Chart.overrides.doughnut.plugins.legend : Chart.defaults.plugins.legend;
+                                    const base = lg.labels.generateLabels(chart);
+                                    if (!empty) base.forEach((l, i) => { l.text = o.labels[i] + ': ' + o.fmt(o.values[i], i); });
+                                    return base;
+                                }
+                            }
+                        },
+                        tooltip: { enabled: !empty, callbacks: { label: (c) => ' ' + (o.tip ? o.tip(c.parsed, c.dataIndex) : o.labels[c.dataIndex] + ': ' + o.fmt(c.parsed, c.dataIndex)) } }
+                    }
+                },
+                plugins: [donutPlugin]
+            });
+            bindChartDownload(canvasId, key);
+        }
+
+        // Admin: klik grafik → unduh gambar PNG (judul + donut + rincian nominal).
+        async function exportChartPng(key) {
+            if (!requireAdminDownload()) return;
+            const m = chartMeta[key], src = m && document.getElementById(m.canvasId);
+            if (!m || !src) return showToast('Grafik belum siap diunduh.', 'error');
+            const APP = (typeof APP_NAME !== 'undefined' ? APP_NAME : 'SPPG');
+            const rows = m.rows || m.labels.map((l, i) => ({ label: l, text: m.fmt(m.values[i], i), color: m.colors[i] }));
+            const shown = rows.slice(0, 20), more = rows.length - shown.length;
+            const W = 1280, PAD = 48, CH = 460, ROW = 44;
+            const listH = (m.showTotal ? 56 : 0) + shown.length * ROW + (more > 0 ? 40 : 0) + 20;
+            const H = 190 + Math.max(CH, listH) + 100;
+            const c = document.createElement('canvas'); c.width = W; c.height = H;
+            const ctx = c.getContext('2d');
+            ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+            ctx.fillStyle = '#0f172a'; ctx.fillRect(0, 0, W, 140);
+            ctx.fillStyle = '#22c55e'; ctx.fillRect(0, 140, W, 6);
+            ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+            ctx.fillStyle = '#ffffff'; ctx.font = 'bold 38px sans-serif'; ctx.fillText(m.title, PAD, 52);
+            ctx.fillStyle = '#cbd5e1'; ctx.font = '24px sans-serif'; ctx.fillText(APP + '  •  ' + (m.subtitle || ''), PAD, 100);
+            const bx = PAD, by = 180, bw = 600, bh = CH;
+            const k = Math.min(bw / src.width, bh / src.height), dw = src.width * k, dh = src.height * k;
+            ctx.drawImage(src, bx + (bw - dw) / 2, by + (bh - dh) / 2, dw, dh);
+            let y = 200; const x0 = 700;
+            ctx.fillStyle = '#334155'; ctx.font = 'bold 24px sans-serif'; ctx.fillText('Rincian', x0, y); y += 18;
+            if (m.showTotal) { y += 28; ctx.fillStyle = '#0f172a'; ctx.font = 'bold 28px sans-serif'; ctx.fillText('Total ' + dashNum(m.total), x0, y); y += 28; }
+            if (m.empty) { y += 40; ctx.fillStyle = '#94a3b8'; ctx.font = '22px sans-serif'; ctx.fillText('Belum ada data pada periode ini.', x0, y); }
+            shown.forEach(r => {
+                y += ROW;
+                ctx.fillStyle = r.color; ctx.fillRect(x0, y - 11, 22, 22);
+                ctx.fillStyle = '#1e293b'; ctx.font = '22px sans-serif'; ctx.textAlign = 'left';
+                let t = String(r.label); while (t.length > 3 && ctx.measureText(t).width > 300) t = t.slice(0, -2) + '…';
+                ctx.fillText(t, x0 + 36, y);
+                ctx.font = 'bold 22px sans-serif'; ctx.textAlign = 'right'; ctx.fillText(r.text, W - PAD, y); ctx.textAlign = 'left';
+            });
+            if (more > 0) { y += ROW; ctx.fillStyle = '#94a3b8'; ctx.font = '20px sans-serif'; ctx.fillText('+ ' + more + ' barang lainnya', x0, y); }
+            ctx.fillStyle = '#64748b'; ctx.font = '20px sans-serif'; ctx.textAlign = 'center';
+            ctx.fillText('Dicetak: ' + new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'short' }), W / 2, H - 40);
+            const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+            const name = APP.replace(/[^a-zA-Z0-9-_]/g, '_') + '_Grafik_' + key + '_' + new Date().toISOString().slice(0, 10) + '.png';
+            await deliverImageFiles([new File([blob], name, { type: 'image/png' })]);
+        }
+
+        function renderCharts(valInMonth, valOutMonth, wasteData) {
+            renderOmprengStats();
+            const { valOmpreng } = computeOmprengMonthlyStats();
+            const valBahan = Object.values(wasteData).reduce((a, b) => a + b, 0);
+            const sub = 'Bulan ini (' + new Date().toLocaleDateString('id-ID', { month: 'long', year: 'numeric' }) + ')';
+            buildDonut('chartTransactions', 'tx', { title: 'Perbandingan Nominal Pemasukan & Pengeluaran', subtitle: sub, labels: ['Pemasukan', 'Pengeluaran'], values: [valInMonth, valOutMonth], colors: [DONUT_COLORS[1], DONUT_COLORS[3]], fmt: (v) => dashNum(v), showTotal: true });
+            buildDonut('chartWaste', 'waste', { title: 'Statistik Sampah Bahan & Ompreng Tidak Termakan', subtitle: sub, labels: ['Kerugian Bahan Baku', 'Ompreng Tidak Termakan'], values: [valBahan, valOmpreng], colors: [DONUT_COLORS[2], DONUT_COLORS[4]], fmt: (v) => dashNum(v), showTotal: true });
+        }
+
+        // Total penggunaan bahan baku (jumlah keluar) per barang, sepanjang histori Barang Keluar.
+        // Donut menampilkan 5 barang terbesar + "Lainnya"; daftar di samping memuat semua barang.
         function renderUsageChart() {
             const usage = {};
             db.transactions.filter(t => t.type === 'OUT').forEach(t => {
@@ -1726,54 +1836,29 @@
             const rows = Object.keys(usage).map(pid => {
                 const p = db.products.find(x => String(x.id) === pid);
                 return { id: pid, name: p ? p.name : 'Barang Terhapus', unit: p ? p.unit : '', qty: usage[pid] };
-            }).filter(r => r.qty > 0).sort((a,b) => b.qty - a.qty);
+            }).filter(r => r.qty > 0).sort((a, b) => b.qty - a.qty);
 
-            const canvasEl = document.getElementById('chartUsagePie');
             const legendEl = document.getElementById('usageLegendList');
-            if (dashboardCharts.usage) dashboardCharts.usage.destroy();
-
-            if (!rows.length) {
-                legendEl.innerHTML = '<p class="text-xs text-slate-400">Belum ada transaksi Barang Keluar.</p>';
-                return;
-            }
-
-            const top = rows.slice(0, 10);
-            const palette = ['#22c55e','#3b82f6','#f59e0b','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f97316','#84cc16','#06b6d4'];
-            const ctxU = canvasEl.getContext('2d');
-
-            dashboardCharts.usage = new Chart(ctxU, {
-                type: 'pie',
-                data: {
-                    labels: top.map(r => r.name),
-                    datasets: [{
-                        data: top.map(r => r.qty),
-                        backgroundColor: top.map((r,i) => {
-                            const g = ctxU.createLinearGradient(0,0,0,320);
-                            g.addColorStop(0, palette[i % palette.length]);
-                            g.addColorStop(1, palette[i % palette.length] + 'aa');
-                            return g;
-                        }),
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed} ${top[ctx.dataIndex].unit}` } }
-                    }
-                },
-                plugins: [makeValueLabelPlugin((v, label, i) => `${v.toFixed(1)} ${top[i] ? top[i].unit : ''}`)]
+            const TOP = 5, top = rows.slice(0, TOP), rest = rows.slice(TOP);
+            const slices = top.map((r, i) => ({ label: r.name, value: r.qty, unit: r.unit, color: DONUT_COLORS[i] }));
+            if (rest.length) slices.push({ label: 'Lainnya (' + rest.length + ' barang)', value: rest.reduce((a, r) => a + r.qty, 0), unit: '', color: DONUT_COLORS[5] });
+            const color = (i) => (i < TOP ? DONUT_COLORS[i] : DONUT_COLORS[5]);
+            buildDonut('chartUsagePie', 'usage', {
+                title: 'Total Penggunaan Semua Bahan Baku', subtitle: 'Seluruh histori Barang Keluar • per satuan barang',
+                labels: slices.map(x => x.label), values: slices.map(x => x.value), colors: slices.map(x => x.color),
+                fmt: (v, i) => (Math.round(v * 10) / 10) + (slices[i] && slices[i].unit ? ' ' + slices[i].unit : ''),
+                legend: false,
+                rows: rows.map((r, i) => ({ label: r.name, text: r.qty.toFixed(2) + ' ' + r.unit, color: color(i) }))
             });
 
+            if (!rows.length) { legendEl.innerHTML = '<p class="text-xs text-slate-400">Belum ada transaksi Barang Keluar.</p>'; return; }
             legendEl.innerHTML = rows.map((r, i) => `
                 <div class="flex items-center justify-between text-xs bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
                     <span class="flex items-center gap-2 font-semibold text-slate-700">
-                        <span class="w-2.5 h-2.5 rounded-full" style="background:${palette[i % palette.length]}"></span>
-                        ${r.name}
+                        <span class="w-2.5 h-2.5 rounded-full" style="background:${color(i)}"></span>
+                        ${escHist(r.name)}
                     </span>
-                    <span class="font-bold text-slate-800">${r.qty.toFixed(2)} ${r.unit}</span>
+                    <span class="font-bold text-slate-800">${r.qty.toFixed(2)} ${escHist(r.unit)}</span>
                 </div>
             `).join('');
         }
@@ -1865,6 +1950,7 @@
         }
 
         function exportDetailToExcel() {
+            if (!requireAdminDownload()) return;
             if (currentUser !== 'ADMIN') return showToast('Akses ditolak', 'error');
             if (!activeDetailType) return;
             const type = activeDetailType;
@@ -1913,7 +1999,6 @@
                         <td class="py-3 px-4 font-bold text-slate-800">${p.name}</td>
                         <td class="py-3 px-4"><span class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">${p.category}</span></td>
                         <td class="py-3 px-4 text-sm">${p.unit}</td>
-                        <td class="py-3 px-4 text-right text-sm font-semibold">${formatRp(p.price)}</td>
                         <td class="py-3 px-4 text-center text-sm">${p.minStock}</td>
                         <td class="py-3 px-4 text-center">
                             <button onclick="editMaster('${p.id}')" class="text-blue-500 hover:text-blue-700 mr-2"><i class="fa-solid fa-pen-to-square"></i></button>
@@ -1944,7 +2029,7 @@
                 category: document.getElementById('mCat').value,
                 unit: document.getElementById('mUnit').value,
                 minStock: parseInt(document.getElementById('mMin').value),
-                price: parseFloat(document.getElementById('mPrice').value)
+                price: parseFloat(document.getElementById('mPrice').value) || 0
             };
 
             const submitBtn = e.target.querySelector('button[type="submit"]');
@@ -2383,7 +2468,7 @@
 
         async function handleOmprengUtuh(e) {
             e.preventDefault();
-            if (currentUser !== 'ADMIN') return showToast('Akses ditolak', 'error');
+            // Admin dan Operator sama-sama boleh mencatat Ompreng Tidak Dimakan.
 
             const date = document.getElementById('ompDate').value;
             const status = document.getElementById('ompStatus').value;
@@ -2543,6 +2628,7 @@
                         <td class="py-3 px-4 text-xs font-mono text-slate-500">-</td>
                         <td class="py-3 px-4 font-bold text-slate-800 text-sm">${escHist(o.type)} <span class="text-xs text-slate-400 font-normal">(${escHist(omprengStatusLabel(o.status))})</span></td>
                         <td class="py-3 px-4 text-right font-bold text-teal-600">${o.qty} <span class="text-[10px] font-normal text-slate-500">ompreng</span></td>
+                        <td class="py-3 px-4 text-right text-sm font-semibold text-slate-700">${formatRp(o.total)}</td>
                         <td class="py-3 px-4 text-xs text-slate-500">-</td>
                         <td class="py-3 px-4 text-xs text-slate-500 truncate max-w-[200px]" title="${escHist(info)}">${escHist(info) || '-'}</td>
                         <td class="py-3 px-4 text-center admin-only text-slate-300">—</td>
@@ -2564,7 +2650,11 @@
             btn.classList.toggle('bg-teal-600', dataMode); btn.classList.toggle('hover:bg-teal-700', dataMode);
             btn.classList.toggle('bg-indigo-600', !dataMode); btn.classList.toggle('hover:bg-indigo-700', !dataMode);
         }
-        function onHistoryDownload() { return getHistoryMode() === 'DATA' ? downloadHistoryDataImage() : generateSupplierInvoice(); }
+        function requireAdminDownload() {
+            if (currentUser !== 'ADMIN') { showToast('Akses ditolak: unduh data, invoice, dan Excel hanya untuk Admin.', 'error'); return false; }
+            return true;
+        }
+        function onHistoryDownload() { if (!requireAdminDownload()) return; return getHistoryMode() === 'DATA' ? downloadHistoryDataImage() : generateSupplierInvoice(); }
         function clearInvoiceDate() {
             document.getElementById('invoiceDate').value = '';
             if (getHistoryMode() === 'DATA') renderHistoryTable(); else generateSupplierInvoice();
@@ -2662,6 +2752,7 @@
         }
 
         async function downloadHistoryDataImage() {
+            if (!requireAdminDownload()) return;
             const type = document.getElementById('histType').value;
             const day = document.getElementById('invoiceDate').value;
             const month = day ? '' : document.getElementById('histMonth').value;
@@ -2730,13 +2821,29 @@
                 ...ompList.map(o => ({ k: 'O', ts: o.timestamp || 0, o }))
             ].sort((a, b) => b.ts - a.ts);
 
+            // Nominal per baris: Masuk = total pembelian; Keluar = nilai FIFO (harga batch yang terpakai);
+            // Sampah = total yang dicatat; Ompreng = total ompreng. Koreksi opname tidak dihitung.
+            const fifoCost = {};
+            new Set(trxList.filter(t => t.type === 'OUT').map(t => String(t.productId))).forEach(pid => {
+                computeFifoConsumptionsForProduct(pid).forEach(c => { fifoCost[c.trxId] = c.allocations.reduce((a, x) => a + (x.subtotal || 0), 0); });
+            });
+            const trxNominal = (t) => {
+                if (t.type === 'CORRECTION') return null;
+                if (t.type === 'OUT') return fifoCost[t.id] > 0 ? fifoCost[t.id] : (Number(t.total) || 0);
+                return Number(t.total) || (Math.abs(Number(t.qty) || 0) * (Number(t.price) || 0));
+            };
+            const sums = { IN: 0, OUT: 0, WASTE: 0, OMPRENG: 0 }, cnts = { IN: 0, OUT: 0, WASTE: 0, OMPRENG: 0, CORRECTION: 0 };
+
             data.forEach(item => {
-                if (item.k === 'O') { tbody.innerHTML += ompRowHtml(item.o); return; }
+                if (item.k === 'O') { sums.OMPRENG += Number(item.o.total) || 0; cnts.OMPRENG++; tbody.innerHTML += ompRowHtml(item.o); return; }
                 const t = item.t;
                 const p = db.products.find(x => String(x.id) === String(t.productId));
                 const pName = p ? p.name : 'Unknown';
                 const pUnit = p ? p.unit : '';
                 const pCode = p ? p.code : (t.productCode || '-');
+                const nom = trxNominal(t);
+                cnts[t.type] = (cnts[t.type] || 0) + 1;
+                if (nom != null) sums[t.type] += nom;
 
                 let typeHtml = '', valPrefix = '', valClass = '';
                 if(t.type === 'IN') { typeHtml = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold">MASUK</span>`; valPrefix='+'; valClass='text-emerald-600'; }
@@ -2752,6 +2859,7 @@
                         <td class="py-3 px-4 text-xs font-mono text-slate-500">${pCode}</td>
                         <td class="py-3 px-4 font-bold text-slate-800 text-sm">${pName} <span class="text-xs text-slate-400 font-normal">(${t.ref})</span></td>
                         <td class="py-3 px-4 text-right font-bold ${valClass}">${valPrefix}${t.qty} <span class="text-[10px] font-normal text-slate-500">${pUnit}</span></td>
+                        <td class="py-3 px-4 text-right text-sm font-semibold text-slate-700">${nom == null ? '<span class="text-slate-300">-</span>' : formatRp(nom)}</td>
                         <td class="py-3 px-4 text-xs text-slate-500">${t.expired || '-'}</td>
                         <td class="py-3 px-4 text-xs text-slate-500 truncate max-w-[200px]" title="${(t.type==='IN' ? 'Supplier: '+(t.supplier||'-')+' — ' : '')}${t.note}">${t.type==='IN' ? `<span class="text-indigo-600 font-semibold">${t.supplier || '-'}</span>${t.note ? ' • '+t.note : ''}` : t.note}${t.photoUrl ? ` <a href="${t.photoUrl}" target="_blank" rel="noopener" class="text-blue-500 hover:text-blue-700" title="Lihat foto bukti"><i class="fa-solid fa-camera"></i></a>` : ''}</td>
                         <td class="py-3 px-4 text-center admin-only">
@@ -2760,8 +2868,25 @@
                     </tr>
                 `;
             });
+            renderHistorySummary(typeFilter, sums, cnts);
             const adminEls = document.querySelectorAll('.admin-only');
             adminEls.forEach(el => el.style.display = currentUser === 'ADMIN' ? '' : 'none');
+        }
+
+        // Ringkasan total nominal di bawah tabel riwayat (mengikuti filter jenis / bulan / tanggal).
+        function renderHistorySummary(typeFilter, sums, cnts) {
+            const box = document.getElementById('historySummary');
+            if (!box) return;
+            const LBL = { IN: 'Masuk', OUT: 'Keluar', WASTE: 'Sampah', OMPRENG: 'Ompreng Tidak Dimakan' };
+            const chip = (k) => `<span class="text-slate-500">${LBL[k]}: <b class="text-slate-800">${formatRp(sums[k])}</b> <span class="text-xs text-slate-400">(${cnts[k]})</span></span>`;
+            if (typeFilter === 'CORRECTION') {
+                box.innerHTML = `<span class="text-slate-500">Koreksi opname tidak memiliki nilai nominal. <span class="text-xs text-slate-400">(${cnts.CORRECTION} catatan)</span></span>`;
+            } else if (typeFilter !== 'ALL') {
+                box.innerHTML = `<span class="font-semibold text-slate-600">Total Nominal ${LBL[typeFilter]}</span><b class="text-lg text-slate-900" id="historyGrandTotal">${formatRp(sums[typeFilter])}</b><span class="text-xs text-slate-400">${cnts[typeFilter]} catatan</span>`;
+            } else {
+                const grand = sums.IN + sums.OUT + sums.WASTE + sums.OMPRENG;
+                box.innerHTML = `<span class="font-semibold text-slate-600">Total Nominal</span><b class="text-lg text-slate-900" id="historyGrandTotal">${formatRp(grand)}</b><span class="flex flex-wrap gap-x-4 gap-y-1 text-sm">${['IN', 'OUT', 'WASTE', 'OMPRENG'].map(chip).join('')}</span>`;
+            }
         }
 
         /**
@@ -2833,6 +2958,7 @@
         }
 
         function generateSupplierInvoice() {
+            if (!requireAdminDownload()) return;
             // Prioritas periode invoice: 1) tanggal spesifik (harian) jika diisi,
             // 2) filter Bulan di sebelah kiri jika diisi, 3) seluruh periode.
             const dayFilter = document.getElementById('invoiceDate').value;   // "YYYY-MM-DD" atau kosong
@@ -3046,6 +3172,7 @@
         }
 
         function exportToExcel() {
+            if (!requireAdminDownload()) return;
             if(currentUser !== 'ADMIN') return showToast('Hanya Admin yang dapat mengunduh laporan lengkap', 'error');
 
             showToast('Memproses file Excel...', 'info');
