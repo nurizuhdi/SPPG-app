@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#f8fafc">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
@@ -20,11 +20,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SPPG Stok">
-    <meta name="theme-color" content="#0f172a">
-    <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;SPPG Inventory %26 Stock Opname&quot;,&quot;short_name&quot;:&quot;SPPG Stok&quot;,&quot;start_url&quot;:&quot;.&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;%23f8fafc&quot;,&quot;theme_color&quot;:&quot;%230f172a&quot;}">
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="tailwind.min.css">
     <!-- Pustaka animasi "motion" (versi dipin). Bila gagal dimuat, aplikasi tetap jalan normal tanpa animasi. -->
     <script src="https://cdn.jsdelivr.net/npm/motion@13.4.6/dist/motion.js" defer></script>
 
@@ -45,19 +41,6 @@
     <script src="config.js"></script>
     <script src="api.js"></script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        primary: { 50: '#f0fdf4', 100: '#dcfce7', 500: '#22c55e', 600: '#16a34a', 700: '#15803d', 800: '#166534', 900: '#14532d' },
-                        sidebar: '#0f172a'
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         /* Animasi loading pada tombol Submit (dipakai oleh setBtnLoading() di JS) */
         @keyframes sppgBtnSpin { to { transform: rotate(360deg); } }
@@ -110,14 +93,11 @@
 
         /* Layout Transitions */
         .view-section { display: none; }
-        .view-section.active { display: block; animation: sppgViewIn 0.45s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
+        .view-section.active { display: block; animation: fadeIn 0.18s ease-out both; }
         @keyframes sppgViewIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
         /* Dashboard: halaman memudar masuk, lalu blok-bloknya muncul berurutan */
         #view-dashboard.active { animation: fadeIn 0.3s ease both; }
-        #view-dashboard.active > * { animation: sppgViewIn 0.5s cubic-bezier(0.22, 0.8, 0.3, 1) both; }
-        #view-dashboard.active > *:nth-child(2) { animation-delay: 0.08s; }
-        #view-dashboard.active > *:nth-child(3) { animation-delay: 0.16s; }
-        #view-dashboard.active > *:nth-child(4) { animation-delay: 0.24s; }
+        #view-dashboard.active > * { animation: none; }
 
         /* Active nav accent */
         .nav-btn { position: relative; overflow: hidden; }
@@ -145,8 +125,63 @@
 
         .kpi-card { cursor: pointer; transition: transform .15s ease, box-shadow .15s ease; }
         .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px -8px rgba(15,23,42,0.25); }
+        .kpi-card { touch-action: manipulation; }
+
+        html, body { width: 100%; height: 100%; }
+        body.h-screen { height: 100%; min-height: 0; }
+        #appContainer { min-width: 0; min-height: 0; }
+        #appContainer > main { min-height: 0; }
+        #viewsContainer { min-height: 0; overscroll-behavior-y: contain; -webkit-overflow-scrolling: touch; }
+        @supports (height: 100dvh) {
+            body.h-screen { height: 100dvh; }
+        }
+        @media (display-mode: standalone) {
+            #appContainer > main > header {
+                padding-top: env(safe-area-inset-top, 0px);
+                height: calc(4rem + env(safe-area-inset-top, 0px));
+            }
+            #viewsContainer {
+                padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+            }
+        }
+        @media (max-width: 767px) {
+            #view-dashboard > .grid:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            #view-dashboard > .grid:first-child > .kpi-card { min-width: 0; }
+        }
+        @media (max-width: 380px) {
+            #view-dashboard > .grid:first-child { grid-template-columns: minmax(0, 1fr); }
+        }
 
         .search-combo { position: relative; }
+
+        html.dark { color-scheme: dark; }
+        html.dark body,
+        html.dark #appContainer main { background-color: #0f172a !important; color: #e2e8f0; }
+        html.dark .bg-white { background-color: #1e293b !important; }
+        html.dark .bg-slate-50 { background-color: #111c2e !important; }
+        html.dark .bg-slate-100 { background-color: #263449 !important; }
+        html.dark .bg-slate-200 { background-color: #334155 !important; }
+        html.dark .text-slate-800,
+        html.dark .text-slate-700 { color: #e2e8f0 !important; }
+        html.dark .text-slate-600,
+        html.dark .text-slate-500 { color: #a8b6c9 !important; }
+        html.dark .text-slate-400 { color: #94a3b8 !important; }
+        html.dark .border-slate-100,
+        html.dark .border-slate-200,
+        html.dark .border-slate-300 { border-color: #334155 !important; }
+        html.dark input,
+        html.dark select,
+        html.dark textarea { background-color: #172438; color: #e2e8f0; border-color: #475569; }
+        html.dark input::placeholder,
+        html.dark textarea::placeholder { color: #94a3b8; }
+        html.dark option { background-color: #172438; color: #e2e8f0; }
+        html.dark .bg-emerald-50,
+        html.dark .bg-green-50 { background-color: #123723 !important; }
+        html.dark .bg-blue-50 { background-color: #172c45 !important; }
+        html.dark .bg-amber-50 { background-color: #3b2d12 !important; }
+        html.dark .bg-rose-50,
+        html.dark .bg-red-50 { background-color: #3b1f2a !important; }
+        html.dark .hover\:bg-slate-100:hover { background-color: #263449 !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen overflow-hidden flex antialiased">
@@ -437,6 +472,12 @@
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <span class="hidden sm:inline">Sistem Aktif</span>
                     </div>
+                    <button type="button" onclick="toggleTheme()" id="themeToggle" class="w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition" aria-label="Aktifkan mode gelap" title="Aktifkan mode gelap">
+                        <i id="themeToggleIcon" class="fa-solid fa-moon" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" onclick="enableTransactionNotifications()" class="admin-only w-9 h-9 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition" aria-label="Aktifkan notifikasi transaksi" title="Aktifkan notifikasi transaksi admin" style="display:none">
+                        <i class="fa-regular fa-bell" aria-hidden="true"></i>
+                    </button>
                 </div>
             </header>
 
@@ -447,7 +488,7 @@
                 <section id="view-dashboard" class="view-section active space-y-6">
                     <!-- KPI Cards -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                        <div onclick="openDetailModal('aset')" class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-blue-500">
+                        <button type="button" onclick="openDetailModal('aset')" class="kpi-card block w-full text-left bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-blue-500" aria-label="Lihat rincian total nilai stok">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Nilai Stok</p>
@@ -456,9 +497,9 @@
                                 <div class="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-wallet"></i></div>
                             </div>
                             <p class="text-xs text-slate-500 mt-3 font-medium">Klik untuk lihat rincian aset</p>
-                        </div>
+                        </button>
 
-                        <div onclick="openDetailModal('masuk')" class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-emerald-500">
+                        <button type="button" onclick="openDetailModal('masuk')" class="kpi-card block w-full text-left bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-emerald-500" aria-label="Lihat rincian pemasukan hari ini">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nominal Pemasukan Hari Ini</p>
@@ -467,9 +508,9 @@
                                 <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-arrow-right-to-bracket"></i></div>
                             </div>
                             <p class="text-xs text-slate-500 mt-3 font-medium" id="dashValInToday">0 transaksi</p>
-                        </div>
+                        </button>
 
-                        <div onclick="openDetailModal('keluar')" class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-rose-500">
+                        <button type="button" onclick="openDetailModal('keluar')" class="kpi-card block w-full text-left bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-rose-500" aria-label="Lihat rincian pengeluaran hari ini">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nominal Pengeluaran Hari Ini</p>
@@ -478,9 +519,9 @@
                                 <div class="w-10 h-10 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center text-lg"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
                             </div>
                             <p class="text-xs text-slate-500 mt-3 font-medium" id="dashValOutToday">0 transaksi</p>
-                        </div>
+                        </button>
 
-                        <div onclick="openDetailModal('lowstock')" class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-amber-400 bg-amber-50/30">
+                        <button type="button" onclick="openDetailModal('lowstock')" class="kpi-card block w-full text-left bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-amber-400 bg-amber-50/30" aria-label="Lihat rincian stok menipis atau habis">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Stok Menipis / Habis</p>
@@ -489,9 +530,9 @@
                                 <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-triangle-exclamation"></i></div>
                             </div>
                             <p class="text-xs text-amber-700/70 mt-3 font-medium">Perlu restock segera</p>
-                        </div>
+                        </button>
 
-                        <div onclick="openDetailModal('expiring')" class="kpi-card bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-fuchsia-400 bg-fuchsia-50/30">
+                        <button type="button" onclick="openDetailModal('expiring')" class="kpi-card block w-full text-left bg-white p-5 rounded-2xl shadow-sm border border-slate-100 border-t-4 border-t-fuchsia-400 bg-fuchsia-50/30" aria-label="Lihat rincian stok yang akan kadaluarsa">
                             <div class="flex justify-between items-start">
                                 <div>
                                     <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Akan Kadaluarsa (H-5)</p>
@@ -500,7 +541,7 @@
                                 <div class="w-10 h-10 rounded-full bg-fuchsia-100 text-fuchsia-600 flex items-center justify-center text-lg"><i class="fa-solid fa-hourglass-half"></i></div>
                             </div>
                             <p class="text-xs text-fuchsia-700/70 mt-3 font-medium">Segera gunakan (prinsip FIFO)</p>
-                        </div>
+                        </button>
                     </div>
 
                     <!-- Charts Area -->
@@ -1226,6 +1267,35 @@
         let dashboardCharts = {};
         let syncTimer = null;
         let activeDetailType = null;
+        let transactionNotificationBaseline = null;
+        const SUBSCRIPTION_PAYWALL_ENABLED = false;
+
+        function setTheme(theme) {
+            const isDark = theme === 'dark';
+            document.documentElement.classList.toggle('dark', isDark);
+            const button = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeToggleIcon');
+            if (button && icon) {
+                icon.className = `fa-solid ${isDark ? 'fa-sun' : 'fa-moon'}`;
+                const label = isDark ? 'Aktifkan mode terang' : 'Aktifkan mode gelap';
+                button.setAttribute('aria-label', label);
+                button.title = label;
+            }
+            document.querySelectorAll('meta[name="theme-color"]').forEach(meta => {
+                meta.setAttribute('content', isDark ? '#0f172a' : '#f8fafc');
+            });
+            try { localStorage.setItem('sppg-theme', isDark ? 'dark' : 'light'); } catch (err) {}
+        }
+
+        function toggleTheme() {
+            setTheme(document.documentElement.classList.contains('dark') ? 'light' : 'dark');
+        }
+
+        try {
+            setTheme(localStorage.getItem('sppg-theme') === 'dark' ? 'dark' : 'light');
+        } catch (err) {
+            setTheme('light');
+        }
 
         // --- Jembatan ke lapisan data Supabase (api.js) ---
         /**
@@ -1275,17 +1345,25 @@
                 db.products = (data.products || []).map(p => ({
                     ...p, minStock: Number(p.minStock) || 0, price: Number(p.price) || 0
                 }));
-                db.transactions = (data.transactions || []).map(t => ({
+                const transactions = (data.transactions || []).map(t => ({
                     ...t, qty: Number(t.qty) || 0, price: Number(t.price) || 0,
                     total: Number(t.total) || 0, timestamp: Number(t.timestamp) || 0,
                     expired: t.expired || ''
                 }));
+                const newTransactions = opts.notifyTransactions && currentUser === 'ADMIN' && transactionNotificationBaseline
+                    ? transactions.filter(t => t.id && !transactionNotificationBaseline.has(String(t.id)))
+                    : [];
+                db.transactions = transactions;
+                if (currentUser === 'ADMIN') {
+                    transactionNotificationBaseline = new Set(transactions.filter(t => t.id).map(t => String(t.id)));
+                }
                 db.omprengUtuh = (data.trayWaste || data.omprengUtuh || []).map(t => ({
                     ...t, qty: Number(t.qty) || 0, price: Number(t.price) || 0,
                     total: Number(t.total) || 0, timestamp: Number(t.timestamp) || 0
                 }));
                 updateStockSnapshot();
                 rerenderCurrentView();
+                if (newTransactions.length) notifyAdminOfTransactions(newTransactions);
                 return true;
             } catch (err) {
                 showToast('Gagal memuat data dari server: ' + (err && err.message ? err.message : err), 'error');
@@ -1311,10 +1389,81 @@
             stopAutoSync();
             // Polling ringan agar semua pengguna (Admin maupun Operator) melihat data terbaru
             // tanpa perlu refresh manual.
-            syncTimer = setInterval(() => { if (currentUser) loadAllData({ silent: true }); }, 8000);
+            syncTimer = setInterval(() => {
+                if (currentUser) loadAllData({ silent: true, notifyTransactions: true });
+            }, 8000);
         }
         function stopAutoSync() {
             if (syncTimer) { clearInterval(syncTimer); syncTimer = null; }
+        }
+
+        function isInstalledPwa() {
+            return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+                window.navigator.standalone === true;
+        }
+
+        async function enableTransactionNotifications() {
+            if (currentUser !== 'ADMIN') return;
+            if (!isInstalledPwa()) {
+                showToast('Buka aplikasi dari ikon di layar utama untuk mengaktifkan notifikasi admin.', 'error');
+                return;
+            }
+            if (!('Notification' in window)) {
+                showToast('Browser ini belum mendukung notifikasi perangkat.', 'error');
+                return;
+            }
+            try {
+                const permission = Notification.permission === 'default'
+                    ? await Notification.requestPermission()
+                    : Notification.permission;
+                if (permission === 'granted') {
+                    showToast('Notifikasi transaksi admin berhasil diaktifkan.', 'success');
+                } else {
+                    showToast('Izin notifikasi belum diberikan. Ubah izin aplikasi di pengaturan perangkat.', 'error');
+                }
+            } catch (err) {
+                showToast('Gagal mengaktifkan notifikasi: ' + (err && err.message ? err.message : err), 'error');
+            }
+        }
+
+        async function notifyAdminOfTransactions(transactions) {
+            if (currentUser !== 'ADMIN' || !isInstalledPwa() ||
+                !('Notification' in window) || Notification.permission !== 'granted') return;
+            try {
+                const registration = 'serviceWorker' in navigator
+                    ? await navigator.serviceWorker.ready
+                    : null;
+                for (const transaction of transactions) {
+                    const product = db.products.find(p => String(p.id) === String(transaction.productId));
+                    const typeLabels = {
+                        IN: 'Barang masuk',
+                        OUT: 'Barang keluar',
+                        WASTE: 'Sampah bahan',
+                        CORRECTION: 'Koreksi stok'
+                    };
+                    const detail = [
+                        product ? product.name : 'Transaksi stok',
+                        `${transaction.qty} ${product && product.unit ? product.unit : 'unit'}`,
+                        transaction.user ? `oleh ${transaction.user}` : ''
+                    ].filter(Boolean).join(' · ');
+                    const options = {
+                        body: detail,
+                        icon: 'icon-192.png',
+                        badge: 'icon-192.png',
+                        tag: `sppg-transaction-${transaction.id}`,
+                        data: { url: './' }
+                    };
+                    const title = `${typeLabels[transaction.type] || 'Transaksi baru'}${transaction.ref ? ` · ${transaction.ref}` : ''}`;
+                    if (registration && registration.showNotification) {
+                        await registration.showNotification(title, options);
+                    } else {
+                        new Notification(title, options);
+                    }
+                }
+            } catch (err) {
+                console.error('Gagal menampilkan notifikasi transaksi admin:', err);
+                showToast('Transaksi baru ditemukan, tetapi notifikasi perangkat gagal ditampilkan.', 'error');
+            }
         }
 
         // --- CORE LOGIC: Dynamic Stock Calculation (dihitung dari histori transaksi) ---
@@ -1337,14 +1486,21 @@
         //     berdasarkan urutan tanggal masuk paling awal) ---
         function computeBatchesForProduct(pid) {
             const txs = db.transactions.filter(t => String(t.productId) === String(pid));
-            let batches = txs.filter(t => t.type === 'IN').map(t => ({
-                ref: t.ref, date: t.date || '', timestamp: t.timestamp || 0,
-                expired: t.expired || '', qty: parseFloat(t.qty) || 0, remaining: parseFloat(t.qty) || 0
-            }));
-            const posCorrections = txs.filter(t => t.type === 'CORRECTION' && parseFloat(t.qty) > 0).map(t => ({
-                ref: t.ref, date: t.date || '', timestamp: t.timestamp || 0,
-                expired: '', qty: parseFloat(t.qty) || 0, remaining: parseFloat(t.qty) || 0
-            }));
+            const toBatch = (t, expired) => {
+                const qty = parseFloat(t.qty) || 0;
+                const transactionPrice = parseFloat(t.price);
+                const transactionTotal = parseFloat(t.total) || 0;
+                const price = Number.isFinite(transactionPrice) && transactionPrice > 0
+                    ? transactionPrice
+                    : (qty && transactionTotal ? transactionTotal / Math.abs(qty) : 0);
+                return {
+                    ref: t.ref, date: t.date || '', timestamp: t.timestamp || 0,
+                    expired: expired ? (t.expired || '') : '',
+                    qty: Math.abs(qty), remaining: Math.abs(qty), price
+                };
+            };
+            let batches = txs.filter(t => t.type === 'IN').map(t => toBatch(t, true));
+            const posCorrections = txs.filter(t => t.type === 'CORRECTION' && parseFloat(t.qty) > 0).map(t => toBatch(t, false));
             batches = batches.concat(posCorrections).sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.timestamp - b.timestamp));
 
             const outflows = txs.filter(t => t.type === 'OUT' || t.type === 'WASTE' || (t.type === 'CORRECTION' && parseFloat(t.qty) < 0))
@@ -1361,6 +1517,15 @@
                 }
             });
             return batches.filter(b => b.remaining > 0.0001);
+        }
+
+        function getInventoryValue(productId) {
+            return computeBatchesForProduct(productId)
+                .reduce((total, batch) => total + batch.remaining * batch.price, 0);
+        }
+
+        function getTotalInventoryValue() {
+            return db.products.reduce((total, product) => total + getInventoryValue(product.id), 0);
         }
 
         function getExpiringBatches(days = EXPIRY_WARNING_DAYS) {
@@ -1529,12 +1694,15 @@
 
         async function loginAs(role, displayName) {
             subscriptionInfo = null;
-            try { subscriptionInfo = await gasRun('getSubscriptionStatus'); } catch (err) { /* fail-open */ }
-            if (subscriptionInfo && subscriptionInfo.active === false) {
+            if (SUBSCRIPTION_PAYWALL_ENABLED) {
+                try { subscriptionInfo = await gasRun('getSubscriptionStatus'); } catch (err) { /* fail-open */ }
+            }
+            if (SUBSCRIPTION_PAYWALL_ENABLED && subscriptionInfo && subscriptionInfo.active === false) {
                 closeAdminLogin(); closeOperatorLogin(); showSubscriptionPaywall(subscriptionInfo); return;
             }
             loadAppName(); loadCustomTimestampLabel();
             currentUser = role;
+            transactionNotificationBaseline = null;
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('appContainer').classList.remove('hidden');
 
@@ -1561,7 +1729,7 @@
             nav('dashboard');
             startAutoSync();
 
-            if (role === 'ADMIN' && subscriptionInfo && subscriptionInfo.trial && subscriptionInfo.daysLeft <= 10) {
+            if (SUBSCRIPTION_PAYWALL_ENABLED && role === 'ADMIN' && subscriptionInfo && subscriptionInfo.trial && subscriptionInfo.daysLeft <= 10) {
                 showToast(`Masa percobaan tersisa ${subscriptionInfo.daysLeft} hari lagi. Segera berlangganan agar tidak terputus.`, 'error');
             }
         }
@@ -1570,6 +1738,7 @@
             if (window.SPPG_API) SPPG_API.logout();
             currentUser = null;
             sessionToken = null;
+            transactionNotificationBaseline = null;
             stopAutoSync();
             document.getElementById('appContainer').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -1640,7 +1809,7 @@
 
             db.products.forEach(p => {
                 const s = db.lastStockSnapshot[p.id] || 0;
-                valStok += s * p.price;
+                valStok += getInventoryValue(p.id);
                 if (s <= p.minStock) lowStock++;
             });
 
@@ -1891,7 +2060,8 @@
             if (type === 'aset') {
                 return db.products.map(p => {
                     const stock = db.lastStockSnapshot[p.id] || 0;
-                    return { code: p.code, name: p.name, unit: p.unit, stock, price: p.price, value: stock * p.price };
+                    const value = getInventoryValue(p.id);
+                    return { code: p.code, name: p.name, unit: p.unit, stock, price: stock ? value / stock : 0, value };
                 }).filter(r => r.stock > 0).sort((a,b) => b.value - a.value);
             }
             if (type === 'masuk' || type === 'keluar') {
@@ -3163,7 +3333,7 @@
                 if(t.type==='OUT') keluar++;
                 if(t.type==='WASTE') vSampah+=parseFloat(t.total);
             });
-            let vStok = db.products.reduce((acc, p) => acc + ((db.lastStockSnapshot[p.id]||0) * p.price), 0);
+            let vStok = getTotalInventoryValue();
 
             document.getElementById('lapTotMasuk').textContent = masuk;
             document.getElementById('lapTotKeluar').textContent = keluar;
@@ -3213,7 +3383,8 @@
             const stokData = [['Kode Barang', 'Nama Barang', 'Kategori', 'Stok Sistem', 'Satuan', 'HPP', 'Nilai Persediaan']];
             db.products.forEach(p => {
                 const s = db.lastStockSnapshot[p.id] || 0;
-                stokData.push([p.code, p.name, p.category, s, p.unit, p.price, s * p.price]);
+                const value = getInventoryValue(p.id);
+                stokData.push([p.code, p.name, p.category, s, p.unit, s ? value / s : 0, value]);
             });
             XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(stokData), "Stok Akhir");
 
