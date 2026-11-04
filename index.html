@@ -36,7 +36,7 @@
     <!-- SheetJS (Excel Export) -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
-    <!-- Supabase JS + konfigurasi + lapisan data (Snap.js Midtrans dimuat otomatis oleh api.js bila MIDTRANS_CLIENT_KEY di config.js sudah diisi) -->
+    <!-- Supabase JS + konfigurasi + lapisan data -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
     <script src="config.js"></script>
     <script src="api.js"></script>
@@ -222,46 +222,25 @@
         </div>
     </div>
 
-    <!-- LICENSE GATE SCREEN (gerbang kode lisensi instalasi, tampil sekali per perangkat) -->
-    <div id="licenseGateScreen" class="fixed inset-0 z-[120] hidden flex items-center justify-center p-4 overflow-hidden" style="background: radial-gradient(120% 100% at 15% 0%, #1e1b4b 0%, #0f172a 45%, #0f172a 100%);">
-        <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md animate-slide-up">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 rounded-full mx-auto mb-3 bg-amber-50 flex items-center justify-center border-2 border-amber-100">
-                    <i class="fa-solid fa-key text-2xl text-amber-600"></i>
-                </div>
-                <h1 class="text-xl font-bold text-slate-800">Aktivasi Aplikasi</h1>
-                <p id="appNameGate" class="text-sm font-semibold text-amber-600 mt-1" data-testid="gate-app-name">SPPG</p>
-                <p class="text-sm text-slate-500 mt-1">Masukkan kode lisensi instalasi untuk perangkat ini. Kode hanya berlaku 1x pemakaian.</p>
-            </div>
-            <form id="licenseGateForm" onsubmit="submitLicenseCode(event)" class="space-y-3">
-                <input type="text" id="licenseCodeInput" required autocomplete="off" placeholder="Contoh: 00000562" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm text-center font-mono tracking-wider uppercase focus:outline-none focus:border-amber-500" data-testid="license-code-input">
-                <p id="licenseGateError" class="text-xs text-rose-600 text-center hidden font-medium"></p>
-                <button type="submit" id="licenseGateSubmitBtn" class="w-full px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold text-sm">Aktifkan</button>
-            </form>
-            <div class="pt-4 mt-2 border-t border-slate-100 text-center">
-                <p class="text-xs text-slate-400 mb-2">Belum punya kode lisensi?</p>
-                <button onclick="openLicenseWhatsapp()" type="button" class="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
-                    <i class="fa-brands fa-whatsapp text-base"></i> Minta Kode via WhatsApp
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- LANGGANAN BERAKHIR / PAYWALL — muncul begitu masa percobaan 30 hari habis & belum bayar -->
+    <!-- MASA AKTIF BERAKHIR — dinding kode aktivasi untuk Admin & Operator. Data tetap utuh; terbuka lagi setelah kode valid (+6 bulan). -->
     <div id="subscriptionPaywallScreen" class="fixed inset-0 z-[125] hidden flex items-center justify-center p-4 overflow-hidden" style="background: radial-gradient(120% 100% at 15% 0%, #7c2d12 0%, #0f172a 45%, #0f172a 100%);">
         <div class="relative bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-md animate-slide-up text-center">
             <div class="w-16 h-16 rounded-full mx-auto mb-3 bg-rose-50 flex items-center justify-center border-2 border-rose-100">
                 <i class="fa-solid fa-lock text-2xl text-rose-600"></i>
             </div>
-            <h1 class="text-xl font-bold text-slate-800">Masa Percobaan Telah Berakhir</h1>
-            <p class="text-sm text-slate-500 mt-2">Masa uji coba 30 hari aplikasi ini sudah habis. Lanjutkan berlangganan untuk terus memakai semua fitur.</p>
-            <p class="text-2xl font-extrabold text-slate-800 mt-4" id="subscriptionPriceText">-</p>
-            <p class="text-xs text-slate-400">per bulan</p>
+            <h1 class="text-xl font-bold text-slate-800">Masa Aktif Telah Berakhir</h1>
+            <p class="text-sm text-slate-500 mt-2">Masa aktif 6 bulan sudah habis. Masukkan kode aktivasi untuk membuka kembali aplikasi. Semua data Anda tetap aman dan akan muncul kembali.</p>
+            <input id="activationCodeInput" type="text" autocomplete="off" placeholder="Masukkan kode aktivasi" class="w-full mt-5 px-4 py-3 border border-slate-300 rounded-lg text-center font-mono tracking-wider uppercase focus:outline-none focus:border-emerald-500">
             <p id="subscriptionPayError" class="text-xs text-rose-600 mt-3 hidden font-medium"></p>
-            <button type="button" onclick="payNow()" id="paySubscriptionBtn" class="w-full mt-5 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
-                <i class="fa-solid fa-credit-card"></i> Bayar Sekarang
+            <button type="button" onclick="activateCode()" id="paySubscriptionBtn" class="w-full mt-4 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
+                <i class="fa-solid fa-key"></i> Aktifkan
             </button>
-            <p class="text-[11px] text-slate-400 mt-3">Pembayaran diproses aman lewat Midtrans (kartu, transfer bank, e-wallet, QRIS).</p>
+            <div class="pt-4 mt-4 border-t border-slate-100">
+                <p class="text-xs text-slate-400 mb-2">Belum punya kode lisensi?</p>
+                <button onclick="openLicenseWhatsapp()" type="button" class="w-full px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-semibold text-sm flex items-center justify-center gap-2">
+                    <i class="fa-brands fa-whatsapp text-base"></i> Minta Kode Lisensi via WhatsApp
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1268,7 +1247,7 @@
         let syncTimer = null;
         let activeDetailType = null;
         let transactionNotificationBaseline = null;
-        const SUBSCRIPTION_PAYWALL_ENABLED = false;
+        const SUBSCRIPTION_PAYWALL_ENABLED = true;
 
         function setTheme(theme) {
             const isDark = theme === 'dark';
@@ -1729,9 +1708,6 @@
             nav('dashboard');
             startAutoSync();
 
-            if (SUBSCRIPTION_PAYWALL_ENABLED && role === 'ADMIN' && subscriptionInfo && subscriptionInfo.trial && subscriptionInfo.daysLeft <= 10) {
-                showToast(`Masa percobaan tersisa ${subscriptionInfo.daysLeft} hari lagi. Segera berlangganan agar tidak terputus.`, 'error');
-            }
         }
 
         function logout() {
@@ -3437,7 +3413,7 @@
                 const res = await gasRun('verifyLicenseCode', code);
                 if (res && res.success) {
                     markLicensePassed(code);
-                    document.getElementById('licenseGateScreen').classList.add('hidden');
+                    document.getElementById('licenseGateScreen')?.classList.add('hidden');
                     await proceedAfterLicenseGate();
                 } else {
                     errEl.textContent = (res && res.message) || 'Kode lisensi tidak valid.';
@@ -3474,7 +3450,7 @@
             try {
                 if (typeof CONTACT_WA !== 'undefined' && /^\d{8,15}$/.test(String(CONTACT_WA))) waNumber = String(CONTACT_WA);
             } catch (e) { /* pakai cadangan */ }
-            const text = encodeURIComponent('Halo, saya butuh kode lisensi instalasi untuk aplikasi ' + APP_NAME + '.');
+            const text = encodeURIComponent('Halo, saya butuh kode lisensi untuk aplikasi ' + APP_NAME + '.');
             openExternalUrl('https://wa.me/' + waNumber + '?text=' + text);
         }
 
@@ -3608,7 +3584,7 @@
         // =====================================================================
         function showLoginScreen() {
             document.getElementById('setupScreen').classList.add('hidden');
-            document.getElementById('licenseGateScreen').classList.add('hidden');
+            document.getElementById('licenseGateScreen')?.classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
             populateOperatorDropdown();
         }
@@ -3629,50 +3605,21 @@
         function showSubscriptionPaywall(sub) {
             document.getElementById('setupScreen').classList.add('hidden');
             document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('subscriptionPriceText').textContent =
-                'Rp ' + Number(sub.price || 0).toLocaleString('id-ID');
             document.getElementById('subscriptionPaywallScreen').classList.remove('hidden');
         }
 
-        /**
-         * TODO: ALUR PEMBAYARAN MIDTRANS (isi sendiri).
-         * Fungsi ini SUDAH memanggil server untuk membuat transaksi & membuka Snap Popup
-         * bawaan Midtrans — bagian yang perlu Anda lengkapi hanya di dalam callback
-         * onSuccess/onPending/onError sesuai kebutuhan bisnis Anda (mis. kirim notifikasi
-         * WhatsApp ke Anda, catat riwayat pembayaran di tempat lain, dsb). Perpanjangan
-         * status langganan itu sendiri SUDAH otomatis ditangani oleh webhook Midtrans
-         * (lihat TODO doPost di Code.gs) begitu pembayaran berhasil, bukan di sini.
-         */
-        async function payNow() {
+        async function activateCode() {
             const btn = document.getElementById('paySubscriptionBtn');
             const errEl = document.getElementById('subscriptionPayError');
+            const code = document.getElementById('activationCodeInput').value.trim();
             errEl.classList.add('hidden');
-            setBtnLoading(btn, true, 'Menyiapkan pembayaran...');
+            if (!code) { errEl.textContent = 'Kode aktivasi wajib diisi.'; errEl.classList.remove('hidden'); return; }
+            setBtnLoading(btn, true, 'Memeriksa kode...');
             try {
-                const res = await gasRun('createSubscriptionPayment', sessionToken || '');
-                if (!res || !res.token) throw new Error(res && res.message ? res.message : 'Gagal membuat transaksi.');
-                setBtnLoading(btn, false);
-                if (typeof snap === 'undefined') {
-                    throw new Error('Skrip Midtrans (Snap.js) belum termuat. Cek MIDTRANS_CLIENT_KEY di config.js.');
-                }
-                snap.pay(res.token, {
-                    onSuccess: function () {
-                        showToast('Pembayaran berhasil! Memuat ulang status langganan...', 'success');
-                        // TODO: tambahkan aksi tambahan Anda sendiri di sini bila perlu.
-                        setTimeout(() => location.reload(), 1500);
-                    },
-                    onPending: function () {
-                        showToast('Pembayaran sedang diproses. Silakan selesaikan pembayaran Anda.', 'success');
-                        // TODO: tambahkan aksi tambahan Anda sendiri di sini bila perlu.
-                    },
-                    onError: function () {
-                        errEl.textContent = 'Pembayaran gagal. Silakan coba lagi.';
-                        errEl.classList.remove('hidden');
-                    },
-                    onClose: function () {
-                        // Pengguna menutup popup Midtrans tanpa menyelesaikan pembayaran — tidak perlu aksi apa pun.
-                    }
-                });
+                const res = await gasRun('activateWorkspaceCode', code);
+                if (!res || !res.success) throw new Error(res && res.message ? res.message : 'Kode tidak valid atau sudah dipakai.');
+                showToast('Aktivasi berhasil! Memuat ulang...', 'success');
+                setTimeout(() => location.reload(), 1200);
             } catch (err) {
                 errEl.textContent = err && err.message ? err.message : String(err);
                 errEl.classList.remove('hidden');
@@ -3704,15 +3651,9 @@
         async function initApp() {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('setupScreen').classList.add('hidden');
-            document.getElementById('licenseGateScreen').classList.add('hidden');
+            document.getElementById('licenseGateScreen')?.classList.add('hidden');
             loadAppName();
             loadCustomTimestampLabel();
-            if (!(await hasLicensePassed())) {
-                document.getElementById('licenseGateScreen').classList.remove('hidden');
-                const codeInput = document.getElementById('licenseCodeInput');
-                if (codeInput && INITIAL_LICENSE_CODE) codeInput.value = INITIAL_LICENSE_CODE;
-                return;
-            }
             await proceedAfterLicenseGate();
         }
         window.addEventListener('DOMContentLoaded', initApp);

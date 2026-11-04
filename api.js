@@ -171,16 +171,8 @@
 
     // ---------- LANGGANAN ----------
     async getSubscriptionStatus() { const s = await rpc('my_subscription'); return { price: window.SPPG_PRICE || 150000, ...(s || {}) }; },
-    createSubscriptionPayment() { return invoke('create-midtrans-payment', {}); }
+    async activateWorkspaceCode(code) { const r = await rpc('activate_account', { p_code: code }); return r || { success: false }; }
   };
-
-  // Snap.js Midtrans (dimuat hanya bila Client Key sudah diisi)
-  if (typeof MIDTRANS_CLIENT_KEY !== 'undefined' && !/ISI_/.test(MIDTRANS_CLIENT_KEY)) {
-    const s = document.createElement('script');
-    s.src = 'https://app' + (MIDTRANS_IS_PRODUCTION ? '' : '.sandbox') + '.midtrans.com/snap/snap.js';
-    s.setAttribute('data-client-key', MIDTRANS_CLIENT_KEY);
-    document.head.appendChild(s);
-  }
 
   window.SPPG_API = API;
   window.SPPG_WS = { get: getWs, set: setWs };
